@@ -1,0 +1,12 @@
+[
+  {
+    "contender_id": "MA_1",
+    "name": "Muhammad Ali",
+    "confidence": 90
+  },
+  {
+    "contender_id": "BH_1",
+    "name": "Badr Hari",
+    "confidence": 70
+  }
+]
