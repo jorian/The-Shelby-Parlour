@@ -1,9 +1,1 @@
-{
-  "wager_id": "w1",
-  "event_id": "ev001",
-  "gambler_id": "g000001",
-  "odds": 5,
-  "selection": 1,
-  "stake": 500,
-  "time_stamp": 9821
-}
+{"wager_id": "w1", "event_id": "ev001", "gambler_id": "g000001", "odds": 5, "selection": 1, "stake": 500, "time_stamp": 9821}

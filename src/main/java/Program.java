@@ -1,8 +1,16 @@
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class Program {
@@ -67,73 +75,116 @@ public class Program {
         } catch (SQLException e) { System.out.println(e.getMessage()); }
     }
 
-    private static void parseJsonToDB(String dbLocation, InputStream inputStream) throws SQLException, IOException {
+    /*
+    This method contains 4 while loops to import data from 4 json files: contenders, events, gamblers and wagers.
+    For every json, a new inputstream needs to be created. Then, based on that inputstream, a BufferedReader is created, to
+    be able to read the file line by line.
+    In the while loop, all data from a json file gets converted to a PreparedStatement, which gets executed such that
+    the data is imported in the right table.
+
+    Since the schema is different for each table, we need 4 different while loops.
+     */
+    private static void parseJsonToDB(String dbLocation) throws SQLException, IOException {
         final Connection conn = DriverManager.getConnection(dbLocation);
+        InputStream inputStream = new FileInputStream(new File("src/contenders.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-        long currentTime = System.currentTimeMillis();
-
-//        the following GREATLY speeds up importing the data: 23 seconds against 120 minutes
-//        conn.prepareStatement("PRAGMA synchronous = OFF").execute();
         conn.setAutoCommit(false);
 
         String line = null;
         JSONObject jsonObject = null;
-        int i = 0;
 
-        String sqlContender = "INSERT INTO contenders(contender_id, name, confidence) VALUES(?,?,?)";
-//        String sqlEvent = "INSERT OR IGNORE INTO events(event_id, outcome, current_odds_contender_1, current_odds_contender_2, contender_1_id, contender_2_id)VALUES(?,?,?,?,?,?)";
-//        String sqlGambler = "INSERT OR IGNORE INTO gamblers(gambler_id, name, address) VALUES(?,?,?)";
-//        String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake,time_stamp)VALUES(?,?,?,?,?,?,?)";
-
+        String sqlContender = "INSERT OR IGNORE INTO contenders(contender_id, name, confidence) VALUES(?,?,?)";
         PreparedStatement ppstmtContender = conn.prepareStatement(sqlContender);
-//        PreparedStatement ppstmtEvent = conn.prepareStatement(sqlEvent);
-//        PreparedStatement ppstmtGambler = conn.prepareStatement(sqlGambler);
-//        PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
+
+        File contenders = new File("src/contenders.json");
+
+        JsonArray jsonArray = new Gson().fromJson(new JsonReader(new FileReader(contenders)), new TypeToken<JsonArray>(){}.getType());
+
+        for (JsonElement jsonElement : jsonArray) {
+            JsonObject contender = (JsonObject) jsonElement;
+
+            ppstmtContender.setString(1, contender.get("contender_id").getAsString());
+            ppstmtContender.setString(2, contender.get("name").getAsString());
+            ppstmtContender.setInt(3, contender.get("confidence").getAsInt());
+
+            ppstmtContender.addBatch();
+        }
+        ppstmtContender.executeBatch();
+        conn.commit();
+
+
+        inputStream = new FileInputStream(new File("src/events.json"));
+        Objects.requireNonNull(inputStream, "InputStream cannot be null");
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+        String sqlEvent = "INSERT OR IGNORE INTO events(event_id, outcome, current_odds_contender_1, current_odds_contender_2, contender_1_id, contender_2_id)VALUES(?,?,?,?,?,?)";
+        PreparedStatement ppstmtEvent = conn.prepareStatement(sqlEvent);
 
         while ((line = bufferedReader.readLine()) != null) {
             System.out.println(line);
             jsonObject = new JSONObject(line);
 
-            // TODO JSON imports
-            ppstmtContender.setString(1, jsonObject.getString("contender_id"));
-            System.out.println(jsonObject.getString("contender_id"));
-            ppstmtContender.setString(2, jsonObject.getString("name"));
-            ppstmtContender.setInt(3, jsonObject.getInt("confidence"));
-            // ... and more
+            ppstmtEvent.setString(1, jsonObject.getString("event_id"));
+            ppstmtEvent.setInt(2, jsonObject.getInt("outcome"));
+            ppstmtEvent.setString(3, jsonObject.getString("contender_1_id"));
+            ppstmtEvent.setInt(4, jsonObject.getInt("current_odds_contender_1"));
+            ppstmtEvent.setString(5, jsonObject.getString("contender_2_id"));
+            ppstmtEvent.setInt(6, jsonObject.getInt("current_odds_contender_2"));
 
-            ppstmtContender.addBatch();
-//            ppstmtEvent.addBatch();
-//            ppstmtGambler.addBatch();
-//            ppstmtWager.addBatch();
-
-//            if (i++ % 10000 == 0) {
-//                ppstmtContender.addBatch();
-////                ppstmtEvent.addBatch();
-////                ppstmtGambler.addBatch();
-////                ppstmtWager.addBatch();
-//
-//                if (i % 100000 == 0)
-//                    conn.commit();
-//                System.out.printf("\nbatch %d executed.", (i / 10000));
-//            }
+            ppstmtEvent.addBatch();
         }
+        ppstmtEvent.executeBatch();
+        conn.commit();
 
-//        if (i % 10000 != 0) {
-//            ppstmtContender.addBatch();
-////            ppstmtEvent.addBatch();
-////            ppstmtGambler.addBatch();
-////            ppstmtWager.addBatch();
-//        }
 
-        ppstmtContender.executeBatch();
-//        ppstmtEvent.executeBatch();
-//        ppstmtGambler.executeBatch();
-//        ppstmtWager.executeBatch();
+        inputStream = new FileInputStream(new File("src/gamblers.json"));
+        Objects.requireNonNull(inputStream, "InputStream cannot be null");
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+        String sqlGambler = "INSERT OR IGNORE INTO gamblers(gambler_id, name, address) VALUES(?,?,?)";
+        PreparedStatement ppstmtGambler = conn.prepareStatement(sqlGambler);
+
+        while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
+            jsonObject = new JSONObject(line);
+
+            ppstmtGambler.setString(1, jsonObject.getString("gambler_id"));
+            ppstmtGambler.setString(2, jsonObject.getString("name"));
+            ppstmtGambler.setString(3, jsonObject.getString("address"));
+
+            ppstmtGambler.addBatch();
+        }
+        ppstmtGambler.executeBatch();
+        conn.commit();
+
+
+        inputStream = new FileInputStream(new File("src/wagers.json"));
+        Objects.requireNonNull(inputStream, "InputStream cannot be null");
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+        // todo add time here:
+        String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake)VALUES(?,?,?,?,?,?)";
+        PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
+
+        while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
+            jsonObject = new JSONObject(line);
+
+            ppstmtWager.setString(1, jsonObject.getString("wager_id"));
+            ppstmtWager.setString(2, jsonObject.getString("event_id"));
+            ppstmtWager.setString(3, jsonObject.getString("gambler_id"));
+            ppstmtWager.setInt(4, jsonObject.getInt("odds"));
+            ppstmtWager.setInt(5, jsonObject.getInt("selection"));
+            ppstmtWager.setInt(6, jsonObject.getInt("stake"));
+            // todo: add date
+
+            ppstmtWager.addBatch();
+        }
+        ppstmtWager.executeBatch();
         conn.commit();
         conn.close();
-        System.out.println("\nTotal time in seconds: " + (System.currentTimeMillis() - currentTime) / 1000);
     }
 
     public static void main(String[] args) {
@@ -144,10 +195,7 @@ public class Program {
         createTables(dbLocation);
 
         try {
-            parseJsonToDB(dbLocation, new FileInputStream(new File("src/contenders.json")));
-//            parseJsonToDB(dbLocation, new FileInputStream(new File("src/events.json")));
-//            parseJsonToDB(dbLocation, new FileInputStream(new File("src/gamblers.json")));
-//            parseJsonToDB(dbLocation, new FileInputStream(new File("src/wagers.json")));
+            parseJsonToDB(dbLocation);
         } catch (SQLException | IOException e) { e.printStackTrace(); }
     }
 }
