@@ -4,18 +4,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+
 import java.util.Objects;
 
 public class Program {
+
     private static void createNewDatabase(String dbLocation) {
         try (Connection conn = DriverManager.getConnection(dbLocation)) {
             if (conn != null) {
-                DatabaseMetaData meta = conn.getMetaData();
+                    DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
                 System.out.println("A new database has been created.");
             }
@@ -57,7 +60,7 @@ public class Program {
                 "odds INTEGER(255) NOT NULL," +
                 "selection INTEGER NOT NULL," +
                 "stake INTEGER NOT NULL," +
-                "date_of_wager DATE NOT NULL," +
+                "time_stamp INTEGER NOT NULL," +
                 "PRIMARY KEY (wager_id)," +
                 "FOREIGN KEY (event_id) REFERENCES events(event_id)," +
                 "FOREIGN KEY (gambler_id) REFERENCES gamblers(gambler_id)" +
@@ -65,7 +68,6 @@ public class Program {
 
         try (Connection conn = DriverManager.getConnection(dbLocation);
              Statement stmt = conn.createStatement()) {
-
             stmt.execute(gamblerTable);
             stmt.execute(wagerTable);
             stmt.execute(eventTable);
@@ -83,15 +85,15 @@ public class Program {
     Since the schema is different for each table, we need 4 different while loops.
      */
     private static void parseJsonToDB(String dbLocation) throws SQLException, IOException {
-        final Connection conn = DriverManager.getConnection(dbLocation);
+        Connection conn = DriverManager.getConnection(dbLocation);
+
         InputStream inputStream = new FileInputStream(new File("src/contenders.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-        conn.setAutoCommit(false);
-
-        String line = null;
-        JSONObject jsonObject = null;
+        conn.setAutoCommit(false); // disables the automatic updating and commits to the database so we can batch statements and significantly improve speed
+        String line;
+        JSONObject jsonObject;
 
         String sqlContender = "INSERT OR IGNORE INTO contenders(contender_id, name, confidence) VALUES(?,?,?)";
         PreparedStatement ppstmtContender = conn.prepareStatement(sqlContender);
@@ -111,7 +113,6 @@ public class Program {
         }
         ppstmtContender.executeBatch();
         conn.commit();
-
 
         inputStream = new FileInputStream(new File("src/events.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
@@ -136,7 +137,6 @@ public class Program {
         ppstmtEvent.executeBatch();
         conn.commit();
 
-
         inputStream = new FileInputStream(new File("src/gamblers.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -147,7 +147,6 @@ public class Program {
         while ((line = bufferedReader.readLine()) != null) {
             System.out.println(line);
             jsonObject = new JSONObject(line);
-
             ppstmtGambler.setString(1, jsonObject.getString("gambler_id"));
             ppstmtGambler.setString(2, jsonObject.getString("name"));
             ppstmtGambler.setString(3, jsonObject.getString("address"));
@@ -157,18 +156,16 @@ public class Program {
         ppstmtGambler.executeBatch();
         conn.commit();
 
-
         inputStream = new FileInputStream(new File("src/wagers.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake,date_of_wager)VALUES(?,?,?,?,?,?,?)";
-        PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
 
+        PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
         while ((line = bufferedReader.readLine()) != null) {
             System.out.println(line);
             jsonObject = new JSONObject(line);
-
             ppstmtWager.setString(1, jsonObject.getString("wager_id"));
             ppstmtWager.setString(2, jsonObject.getString("event_id"));
             ppstmtWager.setString(3, jsonObject.getString("gambler_id"));
@@ -191,8 +188,7 @@ public class Program {
         createNewDatabase(dbLocation);
         createTables(dbLocation);
 
-        try {
-            parseJsonToDB(dbLocation);
+        try { parseJsonToDB(dbLocation);
         } catch (SQLException | IOException e) { e.printStackTrace(); }
     }
 }
