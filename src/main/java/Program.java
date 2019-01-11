@@ -88,7 +88,7 @@ public class Program {
             System.out.println("The events selected are:");
             int rowCount = 0;
             while(rset.next()) {   // Move the cursor to the next row, return false if no more row
-                int    stake   = rset.getInt("stake");
+                int stake = rset.getInt("stake");
                 ++rowCount;
             }
             System.out.println("Total number of wagers = " + rowCount);
