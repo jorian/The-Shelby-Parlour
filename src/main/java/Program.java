@@ -4,10 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import org.json.JSONObject;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-
 import java.util.Objects;
 
 public class Program {
@@ -15,11 +15,13 @@ public class Program {
     private static void createNewDatabase(String dbLocation) {
         try (Connection conn = DriverManager.getConnection(dbLocation)) {
             if (conn != null) {
-                    DatabaseMetaData meta = conn.getMetaData();
+                DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
                 System.out.println("A new database has been created.");
             }
-        } catch (SQLException e) { System.out.println(e.getMessage()); }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void createTables(String dbLocation) {
@@ -57,21 +59,41 @@ public class Program {
                 "odds INTEGER(255) NOT NULL," +
                 "selection INTEGER NOT NULL," +
                 "stake INTEGER NOT NULL," +
-                "time_stamp INTEGER NOT NULL," +
+                "date_of_wager INTEGER NOT NULL," +
                 "PRIMARY KEY (wager_id)," +
                 "FOREIGN KEY (event_id) REFERENCES events(event_id)," +
                 "FOREIGN KEY (gambler_id) REFERENCES gamblers(gambler_id)" +
                 ");";
 
-        try (Connection conn = DriverManager.getConnection(dbLocation);
-             Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
             stmt.execute(gamblerTable);
             stmt.execute(wagerTable);
             stmt.execute(eventTable);
             stmt.execute(contenderTable);
-        } catch (SQLException e) { System.out.println(e.getMessage()); }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
+    private static void fetchQueries(String dbLocation){
+        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
+            String strSelect =
+                    "SELECT stake " +
+                    "FROM wagers, events WHERE wagers.event_id = 'ev001' AND selection <> outcome; ";
+            System.out.println("\nThe SQL query is: " + strSelect+"\n"); // Echo For debugging
+
+            ResultSet rset = stmt.executeQuery(strSelect);
+            //Process the ResultSet by scrolling the cursor forward via next().
+            //For each row, retrieve the contents of the cells with getXxx(columnName).
+            System.out.println("The events selected are:");
+            int rowCount = 0;
+            while(rset.next()) {   // Move the cursor to the next row, return false if no more row
+                int    stake   = rset.getInt("stake");
+                ++rowCount;
+            }
+            System.out.println("Total number of wagers = " + rowCount);
+        } catch(SQLException ex) { ex.printStackTrace();}
+    }
     /*
     For every json, a new inputStream needs to be created. Then, based on that inputstream, a BufferedReader is created, to
     be able to read the file line by line.
@@ -99,7 +121,7 @@ public class Program {
         String line;
         JSONObject jsonObject;
         /*Insert into the events Table*/
-        InputStream  inputStream = new FileInputStream(new File("src/events.json"));
+        InputStream inputStream = new FileInputStream(new File("src/events.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String sqlEvent = "INSERT OR IGNORE INTO events(event_id, outcome, current_odds_contender_1, current_odds_contender_2, contender_1_id, contender_2_id)VALUES(?,?,?,?,?,?)";
@@ -133,7 +155,7 @@ public class Program {
         }
         ppstmtGambler.executeBatch();
         conn.commit();
-/*Insert into the wagers Table*/
+        /*Insert into the wagers Table*/
         inputStream = new FileInputStream(new File("src/wagers.json"));
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -162,8 +184,9 @@ public class Program {
 
         createNewDatabase(dbLocation);
         createTables(dbLocation);
-
-        try { parseJsonToDB(dbLocation);
+        try {
+            parseJsonToDB(dbLocation);
+            fetchQueries(dbLocation);
         } catch (SQLException | IOException e) { e.printStackTrace(); }
     }
 }
