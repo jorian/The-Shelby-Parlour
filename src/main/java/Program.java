@@ -182,13 +182,19 @@ public class Program {
     }
 
     public static void main(String[] args) {
-        String tableName = "shelby_v1.db";
-        String dbLocation = "jdbc:sqlite:src/" + tableName;
+//        String tableName = "shelby_v1.db";
+//        String dbLocation = "jdbc:sqlite:src/" + tableName;
+//
+//        createNewDatabase(dbLocation);
+//        createTables(dbLocation);
+//
+//        try { parseJsonToDB(dbLocation);
+//        } catch (SQLException | IOException e) { e.printStackTrace(); }
 
-        createNewDatabase(dbLocation);
-        createTables(dbLocation);
-
-        try { parseJsonToDB(dbLocation);
-        } catch (SQLException | IOException e) { e.printStackTrace(); }
+        try {
+            DataCreator.createEvents();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
