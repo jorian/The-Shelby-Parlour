@@ -100,7 +100,7 @@ public class Program {
 
         File contenders = new File("src/contenders.json");
 
-        JsonArray jsonArray = new Gson().fromJson(new JsonReader(new FileReader(contenders)), new TypeToken<JsonArray>(){}.getType());
+        JsonArray jsonArray = new Gson().fromJson(new JsonReader(new FileReader(contenders)), JsonArray.class);
 
         for (JsonElement jsonElement : jsonArray) {
             JsonObject contender = (JsonObject) jsonElement;
