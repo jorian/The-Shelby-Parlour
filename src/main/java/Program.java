@@ -4,13 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
-import java.util.Iterator;
 import java.util.Objects;
 
 public class Program {
@@ -59,7 +57,7 @@ public class Program {
                 "odds INTEGER(255) NOT NULL," +
                 "selection INTEGER NOT NULL," +
                 "stake INTEGER NOT NULL," +
-                "time_stamp INTEGER NOT NULL," +
+                "date_of_wager DATE NOT NULL," +
                 "PRIMARY KEY (wager_id)," +
                 "FOREIGN KEY (event_id) REFERENCES events(event_id)," +
                 "FOREIGN KEY (gambler_id) REFERENCES gamblers(gambler_id)" +
@@ -165,7 +163,7 @@ public class Program {
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
         // todo add time here:
-        String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake)VALUES(?,?,?,?,?,?)";
+        String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake,date_of_wager)VALUES(?,?,?,?,?,?,?)";
         PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
 
         while ((line = bufferedReader.readLine()) != null) {
@@ -178,6 +176,8 @@ public class Program {
             ppstmtWager.setInt(4, jsonObject.getInt("odds"));
             ppstmtWager.setInt(5, jsonObject.getInt("selection"));
             ppstmtWager.setInt(6, jsonObject.getInt("stake"));
+            ppstmtWager.setString(7, jsonObject.getString("date_of_wager"));
+
             // todo: add date
 
             ppstmtWager.addBatch();
