@@ -179,6 +179,12 @@ public class Program {
     }
 
     public static void main(String[] args) {
+//         try {
+//             DataCreator.createEvents();
+//         } catch (IOException e) {
+//             e.printStackTrace();
+//         }
+
         String tableName = "shelby_v1.db";
         String dbLocation = "jdbc:sqlite:src/" + tableName;
 
@@ -188,5 +194,6 @@ public class Program {
             parseJsonToDB(dbLocation);
             fetchQueries(dbLocation);
         } catch (SQLException | IOException e) { e.printStackTrace(); }
+
     }
 }
