@@ -162,7 +162,6 @@ public class Program {
         Objects.requireNonNull(inputStream, "InputStream cannot be null");
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-        // todo add time here:
         String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake,date_of_wager)VALUES(?,?,?,?,?,?,?)";
         PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
 
@@ -177,8 +176,6 @@ public class Program {
             ppstmtWager.setInt(5, jsonObject.getInt("selection"));
             ppstmtWager.setInt(6, jsonObject.getInt("stake"));
             ppstmtWager.setString(7, jsonObject.getString("date_of_wager"));
-
-            // todo: add date
 
             ppstmtWager.addBatch();
         }
