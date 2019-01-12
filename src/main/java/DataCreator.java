@@ -32,13 +32,17 @@ public class DataCreator {
             JsonObject contender1 = (JsonObject) jsonArray.get(selection1);
             JsonObject contender2 = (JsonObject) jsonArray.get(selection2);
 
+            // odds need to make sense: when contender 1 has high odds, contender 2 needs to have lower odds
+            int odds1 = rand.nextInt(9) + 2;
+            int odds2 = 10 - odds1 + 1;
+
             // now create an event in JSON
             JsonObject event = new JsonObject();
             event.addProperty("event_id", "ev00" + i);
             event.addProperty("contender_1_id", contender1.get("contender_id").getAsString());
-            event.addProperty("current_odds_contender_1", rand.nextInt(10) + 2);
+            event.addProperty("current_odds_contender_1", odds1);
             event.addProperty("contender_2_id", contender2.get("contender_id").getAsString());
-            event.addProperty("current_odds_contender_2", rand.nextInt(10) + 2);
+            event.addProperty("current_odds_contender_2", odds2);
             event.addProperty("outcome", rand.nextInt(1) + 1);
 
             // and put it in the events.json file
@@ -46,4 +50,3 @@ public class DataCreator {
         }
     }
 }
-
