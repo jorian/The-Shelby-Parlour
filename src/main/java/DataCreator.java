@@ -43,7 +43,7 @@ public class DataCreator {
             event.addProperty("current_odds_contender_1", odds1);
             event.addProperty("contender_2_id", contender2.get("contender_id").getAsString());
             event.addProperty("current_odds_contender_2", odds2);
-            event.addProperty("outcome", rand.nextInt(1) + 1);
+            event.addProperty("outcome", rand.nextInt(2) + 1);
 
             // and put it in the events.json file
             Files.write(Paths.get("src/events.json"), (event.toString() + "\n").getBytes(), StandardOpenOption.APPEND);
