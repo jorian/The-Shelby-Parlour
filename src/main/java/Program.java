@@ -179,21 +179,21 @@ public class Program {
     }
 
     public static void main(String[] args) {
-//         try {
-//             DataCreator.createEvents();
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
+         try {
+             DataCreator.createEvents();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
 
-        String tableName = "shelby_v1.db";
-        String dbLocation = "jdbc:sqlite:src/" + tableName;
-
-        createNewDatabase(dbLocation);
-        createTables(dbLocation);
-        try {
-            parseJsonToDB(dbLocation);
-            fetchQueries(dbLocation);
-        } catch (SQLException | IOException e) { e.printStackTrace(); }
+//        String tableName = "shelby_v1.db";
+//        String dbLocation = "jdbc:sqlite:src/" + tableName;
+//
+//        createNewDatabase(dbLocation);
+//        createTables(dbLocation);
+//        try {
+//            parseJsonToDB(dbLocation);
+//            fetchQueries(dbLocation);
+//        } catch (SQLException | IOException e) { e.printStackTrace(); }
 
     }
 }
