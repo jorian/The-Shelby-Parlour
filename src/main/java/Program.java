@@ -75,12 +75,12 @@ public class Program {
         }
     }
 
-    private static void fetchQueries(String dbLocation) {
+    private static void EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             String strSelect =
-                    "SELECT wager_id " +
-                    "FROM wagers As w " +
-                    "WHERE (w.event_id = 'ev001' AND w.selection <> " +
+                    "SELECT wager_id, gambler_id, stake " +
+                            "FROM wagers As w " +
+                            "WHERE (w.event_id = \'"+eventId+"\' AND w.selection <> " +
                             "(SELECT outcome " +
                             "FROM events " +
                             "WHERE events.event_id = w.event_id)); ";
@@ -89,13 +89,16 @@ public class Program {
             ResultSet rset = stmt.executeQuery(strSelect);
             //Process the ResultSet by scrolling the cursor forward via next().
             //For each row, retrieve the contents of the cells with getXxx(columnName).
-            System.out.println("The wagers that lost:");
-            int rowCount = 0;
+            System.out.println("Wagers Dropped:");
+            int MulaMade = 0, rowCount = 0;
             while (rset.next()) {   // Move the cursor to the next row, return false if no more row
-                String id = rset.getString("wager_id");
-                System.out.println(id);
+                System.out.print("Booked Wager Nr°: "+rset.getString("wager_id"));
+                System.out.print(", Player id: "+rset.getString("gambler_id"));
+                MulaMade += rset.getInt("stake");
+                System.out.println(", Stake due from player: "+rset.getInt("stake"));
                 ++rowCount;
             }
+            System.out.println("\nTotal House earnings from event = " + MulaMade);
             System.out.println("Total number of wagers = " + rowCount);
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -135,7 +138,7 @@ public class Program {
         String sqlEvent = "INSERT OR IGNORE INTO events(event_id, outcome, current_odds_contender_1, current_odds_contender_2, contender_1_id, contender_2_id)VALUES(?,?,?,?,?,?)";
         PreparedStatement ppstmtEvent = conn.prepareStatement(sqlEvent);
         while ((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
+            //System.out.println(line);
             jsonObject = new JSONObject(line);
             ppstmtEvent.setString(1, jsonObject.getString("event_id"));
             ppstmtEvent.setInt(2, jsonObject.getInt("outcome"));
@@ -154,7 +157,7 @@ public class Program {
         String sqlGambler = "INSERT OR IGNORE INTO gamblers(gambler_id, name, address) VALUES(?,?,?)";
         PreparedStatement ppstmtGambler = conn.prepareStatement(sqlGambler);
         while ((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
+            //System.out.println(line);
             jsonObject = new JSONObject(line);
             ppstmtGambler.setString(1, jsonObject.getString("gambler_id"));
             ppstmtGambler.setString(2, jsonObject.getString("name"));
@@ -170,7 +173,7 @@ public class Program {
         String sqlWager = "INSERT OR IGNORE INTO wagers(wager_id, event_id,gambler_id,odds,selection,stake,date_of_wager)VALUES(?,?,?,?,?,?,?)";
         PreparedStatement ppstmtWager = conn.prepareStatement(sqlWager);
         while ((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
+            //System.out.println(line);
             jsonObject = new JSONObject(line);
             ppstmtWager.setString(1, jsonObject.getString("wager_id"));
             ppstmtWager.setString(2, jsonObject.getString("event_id"));
@@ -200,7 +203,7 @@ public class Program {
         createTables(dbLocation);
         try {
             parseJsonToDB(dbLocation);
-            fetchQueries(dbLocation);
+            EventWins(dbLocation, "ev001");
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
