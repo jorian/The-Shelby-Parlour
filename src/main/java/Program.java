@@ -75,25 +75,33 @@ public class Program {
         }
     }
 
-    private static void fetchQueries(String dbLocation){
+    private static void fetchQueries(String dbLocation) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             String strSelect =
-                    "SELECT stake " +
-                    "FROM wagers, events WHERE wagers.event_id = 'ev001' AND selection <> outcome; ";
-            System.out.println("\nThe SQL query is: " + strSelect+"\n"); // Echo For debugging
+                    "SELECT wager_id " +
+                    "FROM wagers As w " +
+                    "WHERE (w.event_id = 'ev001' AND w.selection <> " +
+                            "(SELECT outcome " +
+                            "FROM events " +
+                            "WHERE events.event_id = w.event_id)); ";
+            System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
 
             ResultSet rset = stmt.executeQuery(strSelect);
             //Process the ResultSet by scrolling the cursor forward via next().
             //For each row, retrieve the contents of the cells with getXxx(columnName).
-            System.out.println("The events selected are:");
+            System.out.println("The wagers that lost:");
             int rowCount = 0;
-            while(rset.next()) {   // Move the cursor to the next row, return false if no more row
-                int stake = rset.getInt("stake");
+            while (rset.next()) {   // Move the cursor to the next row, return false if no more row
+                String id = rset.getString("wager_id");
+                System.out.println(id);
                 ++rowCount;
             }
             System.out.println("Total number of wagers = " + rowCount);
-        } catch(SQLException ex) { ex.printStackTrace();}
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
+
     /*
     For every json, a new inputStream needs to be created. Then, based on that inputstream, a BufferedReader is created, to
     be able to read the file line by line.
@@ -193,7 +201,9 @@ public class Program {
         try {
             parseJsonToDB(dbLocation);
             fetchQueries(dbLocation);
-        } catch (SQLException | IOException e) { e.printStackTrace(); }
+        } catch (SQLException | IOException e) {
+            e.printStackTrace();
+        }
 
     }
 }
