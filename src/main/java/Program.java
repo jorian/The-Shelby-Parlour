@@ -77,13 +77,22 @@ public class Program {
 
     private static void EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
-            String strSelect =
+            String strSelect;
+            if (eventId != null)
+                strSelect =
+                        "SELECT wager_id, gambler_id, stake " +
+                                "FROM wagers As w " +
+                                "WHERE (w.event_id = \'" + eventId + "\' AND w.selection <> " +
+                                "(SELECT outcome " +
+                                "FROM events " +
+                                "WHERE events.event_id = w.event_id)); ";
+
+            else strSelect =
                     "SELECT wager_id, gambler_id, stake " +
                             "FROM wagers As w " +
-                            "WHERE (w.event_id = \'"+eventId+"\' AND w.selection <> " +
+                            "WHERE  w.selection <> " +
                             "(SELECT outcome " +
-                            "FROM events " +
-                            "WHERE events.event_id = w.event_id)); ";
+                            "FROM events ); ";
             System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
 
             ResultSet rset = stmt.executeQuery(strSelect);
@@ -92,10 +101,10 @@ public class Program {
             System.out.println("Wagers Dropped:");
             int MulaMade = 0, rowCount = 0;
             while (rset.next()) {   // Move the cursor to the next row, return false if no more row
-                System.out.print("Booked Wager Nr°: "+rset.getString("wager_id"));
-                System.out.print(", Player id: "+rset.getString("gambler_id"));
+                System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
+                System.out.print(", Player id: " + rset.getString("gambler_id"));
                 MulaMade += rset.getInt("stake");
-                System.out.println(", Stake due from player: "+rset.getInt("stake"));
+                System.out.println(", Stake due from player: " + rset.getInt("stake"));
                 ++rowCount;
             }
             System.out.println("\nTotal House earnings from event = " + MulaMade);
@@ -105,12 +114,6 @@ public class Program {
         }
     }
 
-    /*
-    For every json, a new inputStream needs to be created. Then, based on that inputstream, a BufferedReader is created, to
-    be able to read the file line by line.
-    In the while loop, all data from a json file gets converted to a PreparedStatement, which is then batched en masse into the specified tables.
-    Since the schema is different for each table, we need 4 different while loops.
-     */
     private static void parseJsonToDB(String dbLocation) throws SQLException, IOException {
         Connection conn = DriverManager.getConnection(dbLocation);
         conn.setAutoCommit(false); // disables the automatic updating and commits to the database so we can batch statements and significantly improve speed
@@ -190,20 +193,16 @@ public class Program {
     }
 
     public static void main(String[] args) {
-//         try {
-//             DataCreator.createEvents();
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-
-        String tableName = "shelby_v1.db";
-        String dbLocation = "jdbc:sqlite:src/" + tableName;
-
-        createNewDatabase(dbLocation);
-        createTables(dbLocation);
         try {
+            //try { DataCreator.createEvents(); } catch (IOException e) { e.printStackTrace(); }
+            String tableName = "shelby_v1.db";
+            String dbLocation = "jdbc:sqlite:src/" + tableName;
+            createNewDatabase(dbLocation);
+            createTables(dbLocation);
+
             parseJsonToDB(dbLocation);
-            EventWins(dbLocation, "ev001");
+            EventWins(dbLocation, null);
+
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
