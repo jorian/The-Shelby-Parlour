@@ -87,7 +87,7 @@ public class Program {
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
                                 "(  SELECT selection " +
                                 "FROM wagers AS w1, events " +
-                                "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection != events.outcome )" +
+                                "WHERE events.event_id =  \'" + eventId + "\'   AND w1.selection <> events.outcome )" +
                                 "ORDER BY stake; ";
 
             else strSelect =
@@ -96,7 +96,7 @@ public class Program {
                             "WHERE selection = " +
                             "(  SELECT selection " +
                             "FROM wagers AS w1, events AS e " +
-                            "WHERE e.event_id =  w1.event_id  AND wagers.selection != e.outcome )" +
+                            "WHERE e.event_id =  w1.event_id  AND w1.selection <> e.outcome )" +
                             "ORDER BY stake; ";
             System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
 

@@ -41,7 +41,7 @@ public class App {
                                 "WHERE event_id = '%s' AND selection = (  " +
                                     "SELECT selection " +
                                     "FROM wagers AS w1, events " +
-                                    "WHERE events.event_id = '%s' AND wagers.selection <> events.outcome )" +
+                                    "WHERE events.event_id = '%s' AND w1.selection <> events.outcome )" +
                                 "ORDER BY stake; ", eventID, eventID);
 
                         avgOfWinnings(statement);
@@ -55,13 +55,13 @@ public class App {
                         String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
                         System.out.println(strdate);
 
-                        // todo average of all events is same as selected date..
                         String statement = "SELECT stake " +
                                 "FROM wagers " +
-                                "WHERE selection = " +
-                                "(  SELECT selection " +
-                                "FROM wagers AS w1, events AS e " +
-                                "WHERE e.event_id = w1.event_id AND wagers.selection <> e.outcome) AND date_of_wager = \'" + strdate + "\';";
+                                "WHERE " +
+                                    "selection = (SELECT selection " +
+                                    "FROM wagers AS w1, events AS e " +
+                                    "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome) " +
+                                "AND date_of_wager = \'" + strdate + "\';";
 
                         avgOfWinnings(statement);
 
@@ -70,10 +70,11 @@ public class App {
                     case 3: {
                         String statement = "SELECT stake " +
                                 "FROM wagers " +
-                                "WHERE selection = " +
-                                "(  SELECT selection " +
-                                "FROM wagers AS w1, events AS e " +
-                                "WHERE e.event_id = w1.event_id AND wagers.selection <> e.outcome);";
+                                "WHERE " +
+                                    "selection = (SELECT selection " +
+                                    "FROM wagers AS w1, events AS e " +
+                                    "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome)" +
+                                ";";
 
                         avgOfWinnings(statement);
 
