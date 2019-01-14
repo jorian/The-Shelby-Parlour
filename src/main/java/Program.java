@@ -78,7 +78,7 @@ public class Program {
 
     private static int EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
-            System.out.println("EVENT WINS: HOUSE WINNINGS");
+
             String strSelect;
             if (eventId != null)
                 strSelect =
@@ -112,7 +112,7 @@ public class Program {
                 System.out.println(", odds when bet was made by player: " + rset.getInt("odds"));
                 System.out.println(", Stake due from player: " + rset.getInt("stake"));
             }
-            System.out.println("\nTotal House earnings from event = " + MulaMade);
+            System.out.println("\nTotal House winnings from events = " + MulaMade);
             return MulaMade;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -154,7 +154,7 @@ public class Program {
                 System.out.println(", AMount placed by player * odds " + rset.getInt("stake"));
 
             }
-            System.out.println("\nTotal House earnings from event = " + loss);
+            System.out.println("\nTotal House losses from events = " + loss);
             return loss;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -262,13 +262,26 @@ public class Program {
             }
             System.out.println(myMap.toString());
             for (String k : myMap.keySet())
-                if (myMap.get(k) >= 3)
+                if (myMap.get(k) >= 3){
                     System.out.println("CHEATER ID: " + k);
+                    collect(dbLocation, k);
+                }
+
 
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
 
-
+    private static void collect(String dbLocation, String k) {
+        try (Connection xx = DriverManager.getConnection(dbLocation); Statement stmt = xx.createStatement();) {
+            String strSelect =
+                    "SELECT address FROM gamblers AS x WHERE x.gambler_id = \'"+k+"\';";
+            ResultSet x = stmt.executeQuery(strSelect);
+            while (x.next()) {
+                System.out.println("CHEATER NAME "+x.getString("name"));
+                System.out.println("CHEATER ADDRESS "+x.getString("address"));
+            }
+        } catch (SQLException ex) { ex.printStackTrace(); }
+    }
     public static void main(String[] args) {
         try {
             //try { DataCreator.createWagers(); } catch (IOException e) { e.printStackTrace(); }
@@ -282,16 +295,15 @@ public class Program {
             int pureTokyo = EventWins(dbLocation, null) - EventLosses(dbLocation, null);
             System.out.println("=======================================");
             System.out.println("The Garrison pub's Output: ==> $$ " + pureTokyo);
-            System.out.println("=======================================");
             if (pureTokyo <= 0) {
                 System.err.println("=====================================");
                 System.err.println("The Garrison pub's Output is negative ");
-                System.err.println("FIX a match to recover losses ");
-                System.err.println("=====================================");
+                System.err.println("Recover Money from cheaters and fix a match to recover losses ");
             }
             System.out.println("==============================================================================");
             System.out.println("                 SUSPECTED CHEATERS ==> $$ send arthur to collect");
             System.out.println("==============================================================================");
+
             investigate(dbLocation);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
