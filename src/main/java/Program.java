@@ -75,13 +75,13 @@ public class Program {
         }
     }
 
-    private static void EventWins(String dbLocation, String eventId) {
+    private static int  EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             System.out.println("EVENT WINS: HOUSE WINNINGS");
             String strSelect;
             if (eventId != null)
                 strSelect =
-                        "SELECT wager_id, gambler_id, stake " +
+                        "SELECT wager_id, odds, gambler_id, stake " +
                                 "FROM wagers " +
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
                                 "(  SELECT selection " +
@@ -90,7 +90,7 @@ public class Program {
                                 "ORDER BY stake; ";
 
             else strSelect =
-                    "SELECT wager_id, gambler_id, stake " +
+                    "SELECT wager_id, odds, gambler_id, stake " +
                     "FROM wagers " +
                     "WHERE selection = " +
                     "(  SELECT selection " +
@@ -108,23 +108,26 @@ public class Program {
                 System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
                 System.out.print(", Player id: " + rset.getString("gambler_id"));
                 MulaMade += rset.getInt("stake");
+                System.out.println(", odds when bet was made by player: " + rset.getInt("odds"));
                 System.out.println(", Stake due from player: " + rset.getInt("stake"));
                 ++rowCount;
             }
             System.out.println("\nTotal House earnings from event = " + MulaMade);
-            System.out.println("Total number of wagers = " + rowCount);
+
+            return MulaMade;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+        return 0;
     }
 
-    private static void EventLosses(String dbLocation, String eventId) {
+    private static int EventLosses(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             System.out.println("EVENT LOSSES: HOUSE PAYMENTS");
             String strSelect;
             if (eventId != null)
                 strSelect =
-                        "SELECT wager_id, gambler_id, stake " +
+                        "SELECT wager_id, odds, gambler_id, stake " +
                                 "FROM wagers " +
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
                                 "( SELECT selection " +
@@ -133,7 +136,7 @@ public class Program {
                                 "ORDER BY stake; ";
 
             else strSelect =
-                    "SELECT wager_id, gambler_id, stake " +
+                    "SELECT wager_id, odds, gambler_id, stake " +
                             "FROM wagers " +
                             "WHERE selection = " +
                             "( SELECT selection " +
@@ -144,19 +147,22 @@ public class Program {
 
             ResultSet rset = stmt.executeQuery(strSelect);
             System.out.println("Wagers to be fulfilled:");
-            int MulaMade = 0, rowCount = 0;
+            int loss = 0, rowCount = 0;
             while (rset.next()) {   // Move the cursor to the next row, return false if no more row
                 System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
                 System.out.print(", Player id: " + rset.getString("gambler_id"));
-                MulaMade += rset.getInt("stake");
-                System.out.println(", Amount to pay player: " + rset.getInt("stake"));
+                loss += rset.getInt("odds")* rset.getInt("stake");
+                System.out.println(", odds when bet was made by player: " + rset.getInt("odds"));
+                System.out.println(", AMount placed by player * odds " + rset.getInt("stake"));
                 ++rowCount;
             }
-            System.out.println("\nTotal House earnings from event = " + MulaMade);
-            System.out.println("Total number of wagers = " + rowCount);
+            System.out.println("\nTotal House earnings from event = " + loss);
+
+            return loss;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+        return 0;
     }
 
     private static void parseJsonToDB(String dbLocation) throws SQLException, IOException {
@@ -239,14 +245,24 @@ public class Program {
 
     public static void main(String[] args) {
         try {
-            //try { DataCreator.createEvents(); } catch (IOException e) { e.printStackTrace(); }
+            //try { DataCreator.createWagers(); } catch (IOException e) { e.printStackTrace(); }
             String tableName = "shelby_v1.db";
             String dbLocation = "jdbc:sqlite:src/" + tableName;
             createNewDatabase(dbLocation);
             createTables(dbLocation);
 
             parseJsonToDB(dbLocation);
-            EventLosses(dbLocation, null);
+
+            int pureTokyo = EventWins(dbLocation,null)-EventLosses(dbLocation,null);
+            System.out.println("=======================================");
+            System.out.println("The Garrison pub's Output: ==> $$ "+pureTokyo);
+            System.out.println("=======================================");
+            if(pureTokyo<=0){
+                System.err.println("=====================================");
+                System.err.println("The Garrison pub's Output is negative ");
+                System.err.println("FIX a match to recover losses ");
+                System.err.println("=====================================");
+            }
 
         } catch (SQLException | IOException e) {
             e.printStackTrace();

@@ -1,18 +1,40 @@
-{"wager_id": "w1", "event_id": "ev001", "gambler_id": "g000001", "odds": 5, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
-{"wager_id": "w2", "event_id": "ev001", "gambler_id": "g000002", "odds": 3, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
-{"wager_id": "w3", "event_id": "ev001", "gambler_id": "g000003", "odds": 5, "selection": 1, "stake": 5000, "date_of_wager": "1919-04-01"}
-{"wager_id": "w4", "event_id": "ev001", "gambler_id": "g000004", "odds": 3, "selection": 2, "stake": 800, "date_of_wager": "1919-04-01"}
-{"wager_id": "w5", "event_id": "ev001", "gambler_id": "g000005", "odds": 5, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
-{"wager_id": "w6", "event_id": "ev001", "gambler_id": "g000006", "odds": 3, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
-{"wager_id": "w7", "event_id": "ev002", "gambler_id": "g000001", "odds": 5, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
-{"wager_id": "w8", "event_id": "ev002", "gambler_id": "g000002", "odds": 3, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
+{"wager_id": "w1", "event_id": "ev001", "gambler_id": "g000001", "odds": 2, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
+{"wager_id": "w2", "event_id": "ev001", "gambler_id": "g000002", "odds": 6, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
+{"wager_id": "w3", "event_id": "ev001", "gambler_id": "g000003", "odds": 2, "selection": 1, "stake": 5000, "date_of_wager": "1919-04-01"}
+{"wager_id": "w4", "event_id": "ev001", "gambler_id": "g000004", "odds": 4, "selection": 2, "stake": 800, "date_of_wager": "1919-04-01"}
+{"wager_id": "w5", "event_id": "ev001", "gambler_id": "g000005", "odds": 2, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
+{"wager_id": "w6", "event_id": "ev001", "gambler_id": "g000006", "odds": 2, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
+{"wager_id": "w7", "event_id": "ev002", "gambler_id": "g000001", "odds": 7, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
+{"wager_id": "w8", "event_id": "ev002", "gambler_id": "g000002", "odds": 1, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
 {"wager_id": "w9", "event_id": "ev002", "gambler_id": "g000003", "odds": 5, "selection": 1, "stake": 5000, "date_of_wager": "1919-04-01"}
-{"wager_id": "w10", "event_id": "ev002", "gambler_id": "g000004", "odds": 3, "selection": 2, "stake": 800, "date_of_wager": "1919-04-01"}
-{"wager_id": "w11", "event_id": "ev002", "gambler_id": "g000005", "odds": 5, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
-{"wager_id": "w12", "event_id": "ev002", "gambler_id": "g000006", "odds": 3, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
-{"wager_id": "w13", "event_id": "ev003", "gambler_id": "g000001", "odds": 5, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
-{"wager_id": "w14", "event_id": "ev003", "gambler_id": "g000002", "odds": 3, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
-{"wager_id": "w15", "event_id": "ev003", "gambler_id": "g000003", "odds": 5, "selection": 1, "stake": 5000, "date_of_wager": "1919-04-01"}
+{"wager_id": "w10", "event_id": "ev002", "gambler_id": "g000004", "odds": 2, "selection": 2, "stake": 800, "date_of_wager": "1919-04-01"}
+{"wager_id": "w11", "event_id": "ev002", "gambler_id": "g000005", "odds": 4, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
+{"wager_id": "w12", "event_id": "ev002", "gambler_id": "g000006", "odds": 2, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
+{"wager_id": "w13", "event_id": "ev003", "gambler_id": "g000001", "odds": 6, "selection": 1, "stake": 500, "date_of_wager": "1919-04-01"}
+{"wager_id": "w14", "event_id": "ev003", "gambler_id": "g000002", "odds": 2, "selection": 2, "stake": 1000, "date_of_wager": "1919-04-01"}
+{"wager_id": "w15", "event_id": "ev003", "gambler_id": "g000003", "odds": 4, "selection": 1, "stake": 5000, "date_of_wager": "1919-04-01"}
 {"wager_id": "w16", "event_id": "ev003", "gambler_id": "g000004", "odds": 3, "selection": 2, "stake": 800, "date_of_wager": "1919-04-01"}
-{"wager_id": "w17", "event_id": "ev003", "gambler_id": "g000005", "odds": 5, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
-{"wager_id": "w18", "event_id": "ev003", "gambler_id": "g000006", "odds": 3, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
+{"wager_id": "w17", "event_id": "ev003", "gambler_id": "g000005", "odds": 2, "selection": 1, "stake": 600, "date_of_wager": "1919-04-01"}
+{"wager_id": "w18", "event_id": "ev003", "gambler_id": "g000006", "odds": 4, "selection": 2, "stake": 700, "date_of_wager": "1919-04-01"}
+{"wager_id": "w19", "event_id": "ev003", "gambler_id": "g00001",  "odds":1, "selection":1,  "stake":2073, "date_of_wager":"2019-01-14"}
+{"wager_id":"w19","event_id":"ev006","gambler_id":"g0000027","odds":1,"selection":1,"stake":4393,"date_of_wager":"2019-01-14"}
+{"wager_id":"w20","event_id":"ev006","gambler_id":"g000003","odds":6,"selection":2,"stake":2425,"date_of_wager":"2019-01-14"}
+{"wager_id":"w21","event_id":"ev008","gambler_id":"g000001","odds":4,"selection":1,"stake":7490,"date_of_wager":"2019-01-14"}
+{"wager_id":"w22","event_id":"ev008","gambler_id":"g0000010","odds":5,"selection":2,"stake":7575,"date_of_wager":"2019-01-14"}
+{"wager_id":"w23","event_id":"ev007","gambler_id":"g000002","odds":1,"selection":2,"stake":1233,"date_of_wager":"2019-01-14"}
+{"wager_id":"w24","event_id":"ev004","gambler_id":"g000007","odds":2,"selection":2,"stake":4828,"date_of_wager":"2019-01-14"}
+{"wager_id":"w25","event_id":"ev005","gambler_id":"g0000030","odds":2,"selection":1,"stake":4124,"date_of_wager":"2019-01-14"}
+{"wager_id":"w26","event_id":"ev003","gambler_id":"g000002","odds":1,"selection":2,"stake":7881,"date_of_wager":"2019-01-14"}
+{"wager_id":"w27","event_id":"ev008","gambler_id":"g0000018","odds":5,"selection":2,"stake":3378,"date_of_wager":"2019-01-14"}
+{"wager_id":"w28","event_id":"ev008","gambler_id":"g0000014","odds":1,"selection":1,"stake":7083,"date_of_wager":"2019-01-14"}
+{"wager_id":"w29","event_id":"ev007","gambler_id":"g0000017","odds":6,"selection":2,"stake":1961,"date_of_wager":"2019-01-14"}
+{"wager_id":"w30","event_id":"ev008","gambler_id":"g0000012","odds":3,"selection":1,"stake":1887,"date_of_wager":"2019-01-14"}
+{"wager_id":"w31","event_id":"ev0010","gambler_id":"g000008","odds":6,"selection":1,"stake":9154,"date_of_wager":"2019-01-14"}
+{"wager_id":"w32","event_id":"ev004","gambler_id":"g000003","odds":2,"selection":2,"stake":4644,"date_of_wager":"2019-01-14"}
+{"wager_id":"w33","event_id":"ev004","gambler_id":"g0000020","odds":6,"selection":1,"stake":6563,"date_of_wager":"2019-01-14"}
+{"wager_id":"w34","event_id":"ev008","gambler_id":"g0000027","odds":6,"selection":1,"stake":1475,"date_of_wager":"2019-01-14"}
+{"wager_id":"w35","event_id":"ev0012","gambler_id":"g000001","odds":4,"selection":1,"stake":544,"date_of_wager":"2019-01-14"}
+{"wager_id":"w36","event_id":"ev005","gambler_id":"g000002","odds":4,"selection":1,"stake":5028,"date_of_wager":"2019-01-14"}
+{"wager_id":"w37","event_id":"ev007","gambler_id":"g000004","odds":2,"selection":2,"stake":1252,"date_of_wager":"2019-01-14"}
+{"wager_id":"w38","event_id":"ev006","gambler_id":"g0000019","odds":5,"selection":1,"stake":8305,"date_of_wager":"2019-01-14"}
+{"wager_id":"w39","event_id":"ev004","gambler_id":"g0000028","odds":2,"selection":2,"stake":7870,"date_of_wager":"2019-01-14"}
