@@ -1,7 +1,11 @@
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Scanner;
 
 public class App {
@@ -15,6 +19,9 @@ public class App {
                 "\t3. View popular boxing matches\n");
 
         switch (choice) {
+
+            // Average winnings
+            // for an Event, Day or just overall average.
             case 1:
                 System.out.println("Choice is 1");
 
@@ -26,19 +33,43 @@ public class App {
                 );
 
                 switch (secondChoice) {
-                    case 1:
+                    case 1: {
                         String statement = "SELECT * FROM events;";
 
                         ArrayList results = doSQLStatement(statement);
                         System.out.println("resultset: " + results.toString());
 
+                        String eventID = getEventIDInput("Enter an event ID: ", results);
+                        statement = String.format(
+                                "SELECT wager_id, odds, gambler_id, stake " +
+                                "FROM wagers " +
+                                "WHERE event_id = '%s' AND selection = (  " +
+                                    "SELECT selection " +
+                                    "FROM wagers AS w1, events " +
+                                    "WHERE events.event_id = '%s' AND wagers.selection != events.outcome )" +
+                                "ORDER BY stake; ", eventID, eventID);
+
+                        sumOfWinnings(statement);
+
                         break;
-                    case 2:
+                    }
+                    case 2: {
                         System.out.println("day");
+                        LocalDate date = getDateInput();
+
+                        String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                        System.out.println(strdate);
+
+                        String statement = "SELECT * FROM wagers WHERE date_of_wager = \'" + strdate + "\';";
+
+                        sumOfWinnings(statement);
+
                         break;
-                    case 3:
+                    }
+                    case 3: {
                         System.out.println("Overall average");
                         break;
+                    }
                 }
                 break;
             case 2:
@@ -83,6 +114,58 @@ public class App {
             } catch (NumberFormatException n) {
                 System.out.println("\nNot a number, please enter the option number\n");
             }
+        }
+    }
+
+    private static String getEventIDInput(String questions, ArrayList<String> options) {
+        System.out.println(questions);
+
+        while (true) {
+            Scanner reader = new Scanner(System.in);
+
+            System.out.print("Make your choice: ");
+            String line = reader.nextLine();
+
+            if (options.contains(line)) {
+                return line;
+            } else
+                System.out.println("That event ID does not exist");
+        }
+    }
+
+    private static LocalDate getDateInput() {
+        while (true) {
+            Scanner reader = new Scanner(System.in);
+
+            System.out.print("\nEnter the date YYYY-MM-DD: ");
+            String line = reader.nextLine();
+
+            try {
+                LocalDate date = LocalDate.parse(line);
+                return date;
+            } catch (DateTimeParseException dtpe) {
+                System.out.println("Date not entered correctly, please try again and use YYYY-MM-DD");
+            }
+        }
+    }
+
+    private static void sumOfWinnings(String statement) {
+        String dbLocation = "jdbc:sqlite:src/shelby_v1.db";
+
+        try (Connection connection = DriverManager.getConnection(dbLocation);
+             Statement stmt = connection.createStatement()) {
+
+            ResultSet resultSet = stmt.executeQuery(statement);
+            int sum = 0;
+            int count = 0;
+            while (resultSet.next()) {
+                sum += resultSet.getInt("stake");
+                count++;
+            }
+
+            System.out.println("Average: " + sum / count);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

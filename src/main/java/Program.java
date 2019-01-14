@@ -84,11 +84,10 @@ public class Program {
                         "SELECT wager_id, odds, gambler_id, stake " +
                                 "FROM wagers " +
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
-                                "(  SELECT selection " +
+                                "(   SELECT selection " +
                                     "FROM wagers AS w1, events " +
                                     "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection != events.outcome )" +
                                 "ORDER BY stake; ";
-
             else strSelect =
                     "SELECT wager_id, odds, gambler_id, stake " +
                     "FROM wagers " +
