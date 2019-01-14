@@ -3,9 +3,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class App {
+    @SuppressWarnings("Duplicates")
     public static void main(String[] args) {
         System.out.println("PEAKY BLINDERS Business Improver");
         System.out.println("What you want, eh?\n");
@@ -83,9 +85,50 @@ public class App {
                 }
                 break;
             case 2:
-                System.out.println("Choice is 2"); break;
+                System.out.println("Find cheaters!");
+
+                String dbLocation = "jdbc:sqlite:src/shelby_v1.db";
+
+                try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
+                    String strSelect =
+                            "SELECT gambler_id " +
+                                    "FROM wagers " +
+                                    "WHERE " +
+                                        "selection = (SELECT selection " +
+                                        "FROM wagers AS w1, events AS e " +
+                                        "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome ) " +
+                                    "ORDER BY stake; ";
+
+                    ResultSet x = stmt.executeQuery(strSelect);
+                    HashMap<String, Integer> myMap = new HashMap<String, Integer>();
+
+                    while (x.next()) {
+                        int curVal;
+                        if (myMap.containsKey(x.getString("gambler_id"))) {
+                            curVal = myMap.get(x.getString("gambler_id"));
+                            myMap.put(x.getString("gambler_id"), curVal + 1);
+                        } else
+                            myMap.put(x.getString("gambler_id"), 1);
+                    }
+
+                    for (String k : myMap.keySet())
+                        if (myMap.get(k) >= 3){
+//                            System.out.println("CHEATER ID: " + k);
+
+                            // todo this doesn't print?
+                            strSelect =
+                                    "SELECT name, address FROM gamblers WHERE gambler_id = \'"+k+"\';";
+                            ResultSet addresses = stmt.executeQuery(strSelect);
+                            while (addresses.next()) {
+                                System.out.println(String.format("CHEATER ID: %s, NAME: %s, %s", k, addresses.getString("name"), addresses.getString("address")));
+//                                System.out.println("CHEATER ADDRESS "+ addresses.getString("address"));
+                            }
+                        }
+                } catch (SQLException ex) { ex.printStackTrace(); }
+
+                break;
             case 3:
-                System.out.println("Choice is 3"); break;
+                System.out.println("Popularity of matches"); break;
         }
     }
 

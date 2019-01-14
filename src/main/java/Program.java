@@ -241,7 +241,7 @@ public class Program {
     }
 
     private static void investigate(String dbLocation) {
-        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
+        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
             String strSelect =
                     "SELECT gambler_id " +
                             "FROM wagers " +
