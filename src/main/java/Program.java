@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class Program {
@@ -75,44 +76,43 @@ public class Program {
         }
     }
 
-    private static int  EventWins(String dbLocation, String eventId) {
+    private static int EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
-            System.out.println("EVENT WINS: HOUSE WINNINGS");
+
             String strSelect;
             if (eventId != null)
                 strSelect =
                         "SELECT wager_id, odds, gambler_id, stake " +
                                 "FROM wagers " +
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
-                                "(   SELECT selection " +
-                                    "FROM wagers AS w1, events " +
-                                    "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection != events.outcome )" +
+                                "(  SELECT selection " +
+                                "FROM wagers AS w1, events " +
+                                "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection != events.outcome )" +
                                 "ORDER BY stake; ";
+
             else strSelect =
                     "SELECT wager_id, odds, gambler_id, stake " +
-                    "FROM wagers " +
-                    "WHERE selection = " +
-                    "(  SELECT selection " +
-                       "FROM wagers AS w1, events AS e " +
-                       "WHERE e.event_id =  w1.event_id  AND wagers.selection != e.outcome )" +
-                    "ORDER BY stake; ";
+                            "FROM wagers " +
+                            "WHERE selection = " +
+                            "(  SELECT selection " +
+                            "FROM wagers AS w1, events AS e " +
+                            "WHERE e.event_id =  w1.event_id  AND wagers.selection != e.outcome )" +
+                            "ORDER BY stake; ";
             System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
 
             ResultSet rset = stmt.executeQuery(strSelect);
             //Process the ResultSet by scrolling the cursor forward via next().
             //For each row, retrieve the contents of the cells with getXxx(columnName).
             System.out.println("Wagers Dropped:");
-            int MulaMade = 0, rowCount = 0;
+            int MulaMade = 0;
             while (rset.next()) {   // Move the cursor to the next row, return false if no more row
                 System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
                 System.out.print(", Player id: " + rset.getString("gambler_id"));
                 MulaMade += rset.getInt("stake");
                 System.out.println(", odds when bet was made by player: " + rset.getInt("odds"));
                 System.out.println(", Stake due from player: " + rset.getInt("stake"));
-                ++rowCount;
             }
-            System.out.println("\nTotal House earnings from event = " + MulaMade);
-
+            System.out.println("\nTotal House winnings from events = " + MulaMade);
             return MulaMade;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -130,8 +130,8 @@ public class Program {
                                 "FROM wagers " +
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
                                 "( SELECT selection " +
-                                    "FROM wagers , events " +
-                                    "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection = events.outcome )" +
+                                "FROM wagers , events " +
+                                "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection = events.outcome )" +
                                 "ORDER BY stake; ";
 
             else strSelect =
@@ -139,24 +139,22 @@ public class Program {
                             "FROM wagers " +
                             "WHERE selection = " +
                             "( SELECT selection " +
-                                "FROM wagers AS w1, events AS e " +
-                                "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome )" +
+                            "FROM wagers AS w1, events AS e " +
+                            "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome )" +
                             "ORDER BY stake; ";
             System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
-
             ResultSet rset = stmt.executeQuery(strSelect);
             System.out.println("Wagers to be fulfilled:");
-            int loss = 0, rowCount = 0;
+            int loss = 0;
             while (rset.next()) {   // Move the cursor to the next row, return false if no more row
                 System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
                 System.out.print(", Player id: " + rset.getString("gambler_id"));
-                loss += rset.getInt("odds")* rset.getInt("stake");
+                loss += rset.getInt("odds") * rset.getInt("stake");
                 System.out.println(", odds when bet was made by player: " + rset.getInt("odds"));
                 System.out.println(", AMount placed by player * odds " + rset.getInt("stake"));
-                ++rowCount;
-            }
-            System.out.println("\nTotal House earnings from event = " + loss);
 
+            }
+            System.out.println("\nTotal House losses from events = " + loss);
             return loss;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -242,6 +240,48 @@ public class Program {
         conn.close();
     }
 
+    private static void investigate(String dbLocation) {
+        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
+            String strSelect =
+                    "SELECT gambler_id " +
+                            "FROM wagers " +
+                            "WHERE selection = " +
+                            "( SELECT selection " +
+                            "FROM wagers AS w1, events AS e " +
+                            "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome ) " +
+                            "ORDER BY stake; ";
+            ResultSet x = stmt.executeQuery(strSelect);
+            HashMap<String, Integer> myMap = new HashMap<String, Integer>();
+            while (x.next()) {
+                int curVal;
+                if (myMap.containsKey(x.getString("gambler_id"))) {
+                    curVal = myMap.get(x.getString("gambler_id"));
+                    myMap.put(x.getString("gambler_id"), curVal + 1);
+                } else
+                    myMap.put(x.getString("gambler_id"), 1);
+            }
+            System.out.println(myMap.toString());
+            for (String k : myMap.keySet())
+                if (myMap.get(k) >= 3){
+                    System.out.println("CHEATER ID: " + k);
+                    collect(dbLocation, k);
+                }
+
+
+        } catch (SQLException ex) { ex.printStackTrace(); }
+    }
+
+    private static void collect(String dbLocation, String k) {
+        try (Connection xx = DriverManager.getConnection(dbLocation); Statement stmt = xx.createStatement();) {
+            String strSelect =
+                    "SELECT address FROM gamblers AS x WHERE x.gambler_id = \'"+k+"\';";
+            ResultSet x = stmt.executeQuery(strSelect);
+            while (x.next()) {
+                System.out.println("CHEATER NAME "+x.getString("name"));
+                System.out.println("CHEATER ADDRESS "+x.getString("address"));
+            }
+        } catch (SQLException ex) { ex.printStackTrace(); }
+    }
     public static void main(String[] args) {
         try {
             //try { DataCreator.createWagers(); } catch (IOException e) { e.printStackTrace(); }
@@ -252,17 +292,19 @@ public class Program {
 
             parseJsonToDB(dbLocation);
 
-            int pureTokyo = EventWins(dbLocation,null)-EventLosses(dbLocation,null);
+            int pureTokyo = EventWins(dbLocation, null) - EventLosses(dbLocation, null);
             System.out.println("=======================================");
-            System.out.println("The Garrison pub's Output: ==> $$ "+pureTokyo);
-            System.out.println("=======================================");
-            if(pureTokyo<=0){
+            System.out.println("The Garrison pub's Output: ==> $$ " + pureTokyo);
+            if (pureTokyo <= 0) {
                 System.err.println("=====================================");
                 System.err.println("The Garrison pub's Output is negative ");
-                System.err.println("FIX a match to recover losses ");
-                System.err.println("=====================================");
+                System.err.println("Recover Money from cheaters and fix a match to recover losses ");
             }
+            System.out.println("==============================================================================");
+            System.out.println("                 SUSPECTED CHEATERS ==> $$ send arthur to collect");
+            System.out.println("==============================================================================");
 
+            investigate(dbLocation);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
