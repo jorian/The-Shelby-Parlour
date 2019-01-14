@@ -41,7 +41,7 @@ public class App {
                                 "WHERE event_id = '%s' AND selection = (  " +
                                     "SELECT selection " +
                                     "FROM wagers AS w1, events " +
-                                    "WHERE events.event_id = '%s' AND wagers.selection != events.outcome )" +
+                                    "WHERE events.event_id = '%s' AND wagers.selection <> events.outcome )" +
                                 "ORDER BY stake; ", eventID, eventID);
 
                         avgOfWinnings(statement);
@@ -55,21 +55,27 @@ public class App {
                         String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
                         System.out.println(strdate);
 
+                        // todo average of all events is same as selected date..
                         String statement = "SELECT stake " +
                                 "FROM wagers " +
                                 "WHERE selection = " +
                                 "(  SELECT selection " +
                                 "FROM wagers AS w1, events AS e " +
-                                "WHERE e.event_id = w1.event_id AND wagers.selection != e.outcome AND w1.date_of_wager = \'" + strdate + "\');";
+                                "WHERE e.event_id = w1.event_id AND wagers.selection <> e.outcome) AND date_of_wager = \'" + strdate + "\';";
 
                         avgOfWinnings(statement);
 
                         break;
                     }
                     case 3: {
-                        System.out.println("Overall average");
+                        String statement = "SELECT stake " +
+                                "FROM wagers " +
+                                "WHERE selection = " +
+                                "(  SELECT selection " +
+                                "FROM wagers AS w1, events AS e " +
+                                "WHERE e.event_id = w1.event_id AND wagers.selection <> e.outcome);";
 
-                        // get all wagers
+                        avgOfWinnings(statement);
 
                         break;
                     }
@@ -162,7 +168,9 @@ public class App {
             int sum = 0;
             int count = 0;
             while (resultSet.next()) {
-                sum += resultSet.getInt("stake");
+                int stake = resultSet.getInt("stake");
+                sum += stake;
+                System.out.println(stake);
                 count++;
             }
 

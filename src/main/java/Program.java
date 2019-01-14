@@ -283,30 +283,31 @@ public class Program {
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
     public static void main(String[] args) {
+        //try { DataCreator.createWagers(); } catch (IOException e) { e.printStackTrace(); }
+        String tableName = "shelby_v1.db";
+        String dbLocation = "jdbc:sqlite:src/" + tableName;
+
+        createNewDatabase(dbLocation);
+        createTables(dbLocation);
+
         try {
-            //try { DataCreator.createWagers(); } catch (IOException e) { e.printStackTrace(); }
-            String tableName = "shelby_v1.db";
-            String dbLocation = "jdbc:sqlite:src/" + tableName;
-            createNewDatabase(dbLocation);
-            createTables(dbLocation);
-
             parseJsonToDB(dbLocation);
-
-            int pureTokyo = EventWins(dbLocation, null) - EventLosses(dbLocation, null);
-            System.out.println("=======================================");
-            System.out.println("The Garrison pub's Output: ==> $$ " + pureTokyo);
-            if (pureTokyo <= 0) {
-                System.err.println("=====================================");
-                System.err.println("The Garrison pub's Output is negative ");
-                System.err.println("Recover Money from cheaters and fix a match to recover losses ");
-            }
-            System.out.println("==============================================================================");
-            System.out.println("                 SUSPECTED CHEATERS ==> $$ send arthur to collect");
-            System.out.println("==============================================================================");
-
-            investigate(dbLocation);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
+
+//        int pureTokyo = EventWins(dbLocation, null); // - EventLosses(dbLocation, null);
+//        System.out.println("=======================================");
+//        System.out.println("The Garrison pub's Output: ==> $$ " + pureTokyo);
+//        if (pureTokyo <= 0) {
+//            System.err.println("=====================================");
+//            System.err.println("The Garrison pub's Output is negative ");
+//            System.err.println("Recover Money from cheaters and fix a match to recover losses ");
+//        }
+//        System.out.println("==============================================================================");
+//        System.out.println("                 SUSPECTED CHEATERS ==> $$ send arthur to collect");
+//        System.out.println("==============================================================================");
+//
+//        investigate(dbLocation);
     }
 }
