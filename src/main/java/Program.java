@@ -81,18 +81,21 @@ public class Program {
             if (eventId != null)
                 strSelect =
                         "SELECT wager_id, gambler_id, stake " +
-                                "FROM wagers As w " +
-                                "WHERE (w.event_id = \'" + eventId + "\' AND w.selection <> " +
-                                "(SELECT outcome " +
-                                "FROM events " +
-                                "WHERE events.event_id = w.event_id)); ";
+                                "FROM wagers " +
+                                "WHERE event_id = \'" + eventId + "\' AND selection = " +
+                                "(  SELECT selection " +
+                                    "FROM wagers AS w1, events " +
+                                    "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection != events.outcome )" +
+                                "ORDER BY stake; ";
 
             else strSelect =
                     "SELECT wager_id, gambler_id, stake " +
-                            "FROM wagers As w " +
-                            "WHERE  w.selection <> " +
-                            "(SELECT outcome " +
-                            "FROM events ); ";
+                    "FROM wagers " +
+                    "WHERE selection = " +
+                    "(  SELECT selection " +
+                       "FROM wagers AS w1, events AS e " +
+                       "WHERE e.event_id =  w1.event_id  AND wagers.selection != e.outcome )" +
+                    "ORDER BY stake; ";
             System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
 
             ResultSet rset = stmt.executeQuery(strSelect);
