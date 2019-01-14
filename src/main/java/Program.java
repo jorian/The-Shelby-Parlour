@@ -77,6 +77,7 @@ public class Program {
 
     private static void EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
+            System.out.println("EVENT WINS: HOUSE WINNINGS");
             String strSelect;
             if (eventId != null)
                 strSelect =
@@ -108,6 +109,47 @@ public class Program {
                 System.out.print(", Player id: " + rset.getString("gambler_id"));
                 MulaMade += rset.getInt("stake");
                 System.out.println(", Stake due from player: " + rset.getInt("stake"));
+                ++rowCount;
+            }
+            System.out.println("\nTotal House earnings from event = " + MulaMade);
+            System.out.println("Total number of wagers = " + rowCount);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void EventLosses(String dbLocation, String eventId) {
+        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
+            System.out.println("EVENT LOSSES: HOUSE PAYMENTS");
+            String strSelect;
+            if (eventId != null)
+                strSelect =
+                        "SELECT wager_id, gambler_id, stake " +
+                                "FROM wagers " +
+                                "WHERE event_id = \'" + eventId + "\' AND selection = " +
+                                "( SELECT selection " +
+                                    "FROM wagers , events " +
+                                    "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection = events.outcome )" +
+                                "ORDER BY stake; ";
+
+            else strSelect =
+                    "SELECT wager_id, gambler_id, stake " +
+                            "FROM wagers " +
+                            "WHERE selection = " +
+                            "( SELECT selection " +
+                                "FROM wagers AS w1, events AS e " +
+                                "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome )" +
+                            "ORDER BY stake; ";
+            System.out.println("\nThe SQL query is: " + strSelect + "\n"); // Echo For debugging
+
+            ResultSet rset = stmt.executeQuery(strSelect);
+            System.out.println("Wagers to be fulfilled:");
+            int MulaMade = 0, rowCount = 0;
+            while (rset.next()) {   // Move the cursor to the next row, return false if no more row
+                System.out.print("Booked Wager Nr°: " + rset.getString("wager_id"));
+                System.out.print(", Player id: " + rset.getString("gambler_id"));
+                MulaMade += rset.getInt("stake");
+                System.out.println(", Amount to pay player: " + rset.getInt("stake"));
                 ++rowCount;
             }
             System.out.println("\nTotal House earnings from event = " + MulaMade);
@@ -204,7 +246,7 @@ public class Program {
             createTables(dbLocation);
 
             parseJsonToDB(dbLocation);
-            EventWins(dbLocation, null);
+            EventLosses(dbLocation, null);
 
         } catch (SQLException | IOException e) {
             e.printStackTrace();
