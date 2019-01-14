@@ -3,9 +3,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.Scanner;
 
 public class App {
@@ -35,11 +32,9 @@ public class App {
                 switch (secondChoice) {
                     case 1: {
                         String statement = "SELECT * FROM events;";
-
                         ArrayList results = doSQLStatement(statement);
-                        System.out.println("resultset: " + results.toString());
-
                         String eventID = getEventIDInput("Enter an event ID: ", results);
+
                         statement = String.format(
                                 "SELECT wager_id, odds, gambler_id, stake " +
                                 "FROM wagers " +
@@ -49,25 +44,33 @@ public class App {
                                     "WHERE events.event_id = '%s' AND wagers.selection != events.outcome )" +
                                 "ORDER BY stake; ", eventID, eventID);
 
-                        sumOfWinnings(statement);
+                        avgOfWinnings(statement);
 
                         break;
                     }
                     case 2: {
-                        System.out.println("day");
+                        // Probably overkill, but this way we can check for a correct date:
                         LocalDate date = getDateInput();
 
                         String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
                         System.out.println(strdate);
 
-                        String statement = "SELECT * FROM wagers WHERE date_of_wager = \'" + strdate + "\';";
+                        String statement = "SELECT stake " +
+                                "FROM wagers " +
+                                "WHERE selection = " +
+                                "(  SELECT selection " +
+                                "FROM wagers AS w1, events AS e " +
+                                "WHERE e.event_id = w1.event_id AND wagers.selection != e.outcome AND w1.date_of_wager = \'" + strdate + "\');";
 
-                        sumOfWinnings(statement);
+                        avgOfWinnings(statement);
 
                         break;
                     }
                     case 3: {
                         System.out.println("Overall average");
+
+                        // get all wagers
+
                         break;
                     }
                 }
@@ -149,7 +152,7 @@ public class App {
         }
     }
 
-    private static void sumOfWinnings(String statement) {
+    private static void avgOfWinnings(String statement) {
         String dbLocation = "jdbc:sqlite:src/shelby_v1.db";
 
         try (Connection connection = DriverManager.getConnection(dbLocation);
