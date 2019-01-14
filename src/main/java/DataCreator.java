@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Date;
 import java.util.Random;
 
 public class DataCreator {
@@ -33,8 +34,8 @@ public class DataCreator {
             JsonObject contender2 = (JsonObject) jsonArray.get(selection2);
 
             // odds need to make sense: when contender 1 has high odds, contender 2 needs to have lower odds
-            int odds1 = rand.nextInt(9) + 2;
-            int odds2 = 10 - odds1 + 1;
+            int odds1 = rand.nextInt(6);
+            int odds2 = rand.nextInt(6);
 
             // now create an event in JSON
             JsonObject event = new JsonObject();
@@ -45,8 +46,23 @@ public class DataCreator {
             event.addProperty("current_odds_contender_2", odds2);
             event.addProperty("outcome", rand.nextInt(2) + 1);
 
-            // and put it in the events.json file
             Files.write(Paths.get("src/events.json"), (event.toString() + "\n").getBytes(), StandardOpenOption.APPEND);
+        }
+    }
+    public static void createWagers() throws IOException {
+        File wagers = new File("src/wagers.json");
+        Random rand = new Random();
+        for (int i = 19; i < 40; i++) {
+            JsonObject bet = new JsonObject();
+            bet.addProperty("wager_id", "w" + i);
+            bet.addProperty("event_id", "ev00"+(rand.nextInt(10)+3));
+            bet.addProperty("gambler_id", "g00000"+rand.nextInt(32));
+            bet.addProperty("odds", rand.nextInt(6)+1);
+            bet.addProperty("selection", rand.nextInt(2)+1);
+            bet.addProperty("stake", rand.nextInt(10000) + 5);
+            bet.addProperty("date_of_wager", String.format("%tF", new Date()));
+
+            Files.write(Paths.get("src/wagers.json"), (bet.toString() + "\n").getBytes(), StandardOpenOption.APPEND);
         }
     }
 }
