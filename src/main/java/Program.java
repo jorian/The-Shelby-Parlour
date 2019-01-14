@@ -240,11 +240,6 @@ public class Program {
         conn.close();
     }
 
-    private static String getAddress(String dbLocation, String gambler_id) {
-        //query gambler table for address of id.
-        return "";
-    }
-
     private static void investigate(String dbLocation) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             String strSelect =
@@ -267,30 +262,12 @@ public class Program {
             }
             System.out.println(myMap.toString());
             for (String k : myMap.keySet())
-                if (myMap.get(k) > 3) {
+                if (myMap.get(k) >= 3)
                     System.out.println("CHEATER ID: " + k);
-                    System.out.println("CHEATER INFO: " + getCredentials(dbLocation, k));
-                }
 
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
+        } catch (SQLException ex) { ex.printStackTrace(); }
     }
 
-    private static String getCredentials(String dbLocation, String k) {
-        try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
-            String strSelect = "SELECT name , address FROM gamblers WHERE gambler_id = \'" + k + "\' ;";
-            ResultSet x = stmt.executeQuery(strSelect);
-            while (x.next()) {
-                System.out.println("NAME: " + x.getString("name"));
-                System.out.println("ADDRESS: " + x.getString("address"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     public static void main(String[] args) {
         try {
