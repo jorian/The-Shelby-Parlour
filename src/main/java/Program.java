@@ -76,6 +76,12 @@ public class Program {
         }
     }
 
+    /*
+    This method checks for a specific event OR all events the stake that the house collects, because
+    the gambler lost its bet.
+
+    MulaMade = the total collected stake
+     */
     private static int EventWins(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
 
@@ -120,6 +126,9 @@ public class Program {
         return 0;
     }
 
+    /*
+    This method calculates the payout to gamblers who won a bet. The payout is ODDS of wager * STAKE put up.
+     */
     private static int EventLosses(String dbLocation, String eventId) {
         try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement();) {
             System.out.println("EVENT LOSSES: HOUSE PAYMENTS");
@@ -131,7 +140,7 @@ public class Program {
                                 "WHERE event_id = \'" + eventId + "\' AND selection = " +
                                 "( SELECT selection " +
                                 "FROM wagers , events " +
-                                "WHERE events.event_id =  \'" + eventId + "\'   AND wagers.selection = events.outcome )" +
+                                "WHERE events.event_id =  \'" + eventId + "\'   AND w1.selection = events.outcome )" +
                                 "ORDER BY stake; ";
 
             else strSelect =
