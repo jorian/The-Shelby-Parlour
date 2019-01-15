@@ -121,36 +121,23 @@ public class App {
                     System.out.println("Find cheaters!");
 
                     try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
-                        String strSelect =
-                                "SELECT gambler_id " +
-                                        "FROM wagers " +
-                                        "WHERE " +
-                                        "selection = (SELECT selection " +
-                                        "FROM wagers AS w1, events AS e " +
-                                        "WHERE e.event_id =  w1.event_id  AND w1.selection = e.outcome ) " +
-                                        "ORDER BY stake; ";
+                        String statement = String.format("SELECT gambler_id " +
+                                "FROM (" +
+                                    "SELECT gambler_id, COUNT(gambler_id) AS count " +
+                                    "FROM wagers w " +
+                                    "INNER JOIN events e " +
+                                    "ON w.event_id = e.event_id " +
+                                    "AND e.outcome = w.selection " +
+                                    "AND w.odds > 4 " +
+                                    "GROUP BY gambler_id)" +
+                                "WHERE count > 3;"
+                        );
 
-                        ResultSet x = stmt.executeQuery(strSelect);
-                        HashMap<String, Integer> myMap = new HashMap<String, Integer>();
+                        ResultSet resultSet = stmt.executeQuery(statement);
 
-                        while (x.next()) {
-                            int curVal;
-                            if (myMap.containsKey(x.getString("gambler_id"))) {
-                                curVal = myMap.get(x.getString("gambler_id"));
-                                myMap.put(x.getString("gambler_id"), curVal + 1);
-                            } else
-                                myMap.put(x.getString("gambler_id"), 1);
+                        while (resultSet.next()) {
+                            System.out.println("CHEATER ID: " + resultSet.getString("gambler_id"));
                         }
-
-                        for (String k : myMap.keySet())
-                            if (myMap.get(k) >= 3) {
-                                strSelect = "SELECT name, address FROM gamblers WHERE gambler_id = \'" + k + "\';";
-                                ResultSet addresses = stmt.executeQuery(strSelect);
-
-                                while (addresses.next()) {
-                                    System.out.println(String.format("CHEATER ID: %s, NAME: %s, %s", k, addresses.getString("name"), addresses.getString("address")));
-                                }
-                            }
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
