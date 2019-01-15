@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -155,12 +156,14 @@ public class App {
                         "ON group1.contender_id = group2.contender_id;";
 
                         ResultSet resultSet = stmt.executeQuery(statement);
+                        DecimalFormat df = new DecimalFormat("#.##");
 
                         while (resultSet.next()) {
-                            System.out.printf("\n%s\t WON: %d out of %d",
+                            System.out.printf("\n%s\t WON: %d out of %d -> %s%%",
                                     resultSet.getString("contender_id"),
                                     resultSet.getInt("won"),
-                                    resultSet.getInt("played"));
+                                    resultSet.getInt("played"),
+                                    df.format(100 * ((double) resultSet.getInt("won") / (double) resultSet.getInt("played"))));
                         }
                     }
                     catch (SQLException e) {
