@@ -97,19 +97,20 @@ public class App {
                             break;
                         }
                         case 3: {
+
+                            // 1. get all stakes
                             String statement = "SELECT stake FROM wagers;";
 
                             int totalStake = sumOfStake(statement);
 
-                            statement = "SELECT stake " +
-                                    "FROM wagers " +
-                                    "WHERE " +
-                                    "selection = (SELECT selection " +
-                                    "FROM wagers AS w1, events AS e " +
-                                    "WHERE e.event_id = w1.event_id AND w1.selection = e.outcome)" +
-                                    ";";
+                            // 2. get all payouts
+                            statement = "SELECT sum(stake) " +
+                                    "FROM wagers w " +
+                                    "INNER JOIN events e " +
+                                    "ON w.event_id = e.event_id " +
+                                    "AND e.outcome = w.selection;";
 
-                            int payouts = sumOfStake(statement);
+                            int payouts = getSum(statement);
 
                             System.out.println("Total profits: " + (totalStake - payouts));
                             break;
