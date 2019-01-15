@@ -48,21 +48,23 @@ public class App {
                             );
 
                             int allStakes = sumOfStake(statement);
+                            System.out.println("All stakes: " + allStakes);
 
                             // 2. get all payouts
                             statement = String.format(
-                                    "SELECT stake " +
-                                            "FROM wagers " +
-                                            "WHERE event_id = '%s' AND selection = (  " +
-                                            "SELECT selection " +
-                                            "FROM wagers AS w1, events " +
-                                            "WHERE events.event_id = '%s' AND w1.selection = events.outcome ) " +
-                                            "ORDER BY stake; ", eventID, eventID
+                                    "SELECT sum(stake) " +
+                                            "FROM wagers w " +
+                                            "INNER JOIN events e " +
+                                            "ON w.event_id = e.event_id " +
+                                            "AND e.event_id = '%s'" +
+                                            "AND e.outcome <> w.selection;", eventID
                             );
 
-                            int payouts = sumOfStake(statement);
+                            int payouts = getSum(statement);
 
-                            System.out.println(allStakes - payouts);
+                            System.out.println("All payouts: "+ payouts);
+
+                            System.out.println("Profits: " + (allStakes - payouts));
 
                             break;
                         }
@@ -241,6 +243,7 @@ public class App {
     private static int sumOfStake(String statement) {
         try (Connection connection = DriverManager.getConnection(dbLocation);
              Statement stmt = connection.createStatement()) {
+            System.out.println(statement);
 
             ResultSet resultSet = stmt.executeQuery(statement);
             int sum = 0;
@@ -251,7 +254,23 @@ public class App {
                 count++;
             }
 
+
+
             return sum;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private static int getSum(String statement) {
+        try (Connection connection = DriverManager.getConnection(dbLocation);
+             Statement stmt = connection.createStatement()) {
+            System.out.println(statement);
+
+            ResultSet resultSet = stmt.executeQuery(statement);
+
+            return resultSet.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
