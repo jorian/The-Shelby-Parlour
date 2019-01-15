@@ -60,7 +60,7 @@ public class App {
                                             "AND e.outcome = w.selection;", eventID
                             );
 
-                            int payouts = getSum(statement);
+                            int payouts = aggregatedSumOfStake(statement);
 
                             System.out.println("All payouts: "+ payouts);
                             System.out.println("Profits: " + (allStakes - payouts));
@@ -90,7 +90,7 @@ public class App {
                                     "AND w.date_of_wager = '%s';", strdate
                             );
 
-                            int payouts = getSum(statement);
+                            int payouts = aggregatedSumOfStake(statement);
 
                             System.out.println("Profit: " + (stake - payouts));
 
@@ -110,7 +110,7 @@ public class App {
                                     "ON w.event_id = e.event_id " +
                                     "AND e.outcome = w.selection;";
 
-                            int payouts = getSum(statement);
+                            int payouts = aggregatedSumOfStake(statement);
 
                             System.out.println("Total profits: " + (totalStake - payouts));
                             break;
@@ -144,14 +144,11 @@ public class App {
 
                         for (String k : myMap.keySet())
                             if (myMap.get(k) >= 3) {
-//                            System.out.println("CHEATER ID: " + k);
-
-                                strSelect =
-                                        "SELECT name, address FROM gamblers WHERE gambler_id = \'" + k + "\';";
+                                strSelect = "SELECT name, address FROM gamblers WHERE gambler_id = \'" + k + "\';";
                                 ResultSet addresses = stmt.executeQuery(strSelect);
+
                                 while (addresses.next()) {
                                     System.out.println(String.format("CHEATER ID: %s, NAME: %s, %s", k, addresses.getString("name"), addresses.getString("address")));
-//                                System.out.println("CHEATER ADDRESS "+ addresses.getString("address"));
                                 }
                             }
                     } catch (SQLException ex) {
@@ -206,12 +203,12 @@ public class App {
         System.out.println(options);
 
         while (true) {
-            Scanner reader = new Scanner(System.in);
-
             System.out.print("Make your choice: ");
+            Scanner reader = new Scanner(System.in);
             String line = reader.nextLine();
 
             if (options.contains(line)) {
+
                 return line;
             } else
                 System.out.println("That event ID does not exist");
@@ -227,6 +224,7 @@ public class App {
 
             try {
                 LocalDate date = LocalDate.parse(line);
+
                 return date;
             } catch (DateTimeParseException dtpe) {
                 System.out.println("Date not entered correctly, please try again and enter the date as YYYY-MM-DD");
@@ -248,8 +246,6 @@ public class App {
                 count++;
             }
 
-
-
             return sum;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -257,7 +253,7 @@ public class App {
         }
     }
 
-    private static int getSum(String statement) {
+    private static int aggregatedSumOfStake(String statement) {
         try (Connection connection = DriverManager.getConnection(dbLocation);
              Statement stmt = connection.createStatement()) {
             System.out.println(statement);
@@ -267,6 +263,7 @@ public class App {
             return resultSet.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
+
             return 0;
         }
     }
