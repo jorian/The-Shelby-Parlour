@@ -18,7 +18,7 @@ public class App {
         while (true) {
             int choice = getMenuChoice(
                     "\n\n\n\n>>>>>> Main menu:\n\n" +
-                            "\t1. Show average winnings\n" +
+                            "\t1. Show profits\n" +
                             "\t2. Show possible cheaters\n" +
                             "\t3. View popular boxing matches\n");
 
@@ -28,10 +28,10 @@ public class App {
                 // for an Event, Day or just overall average.
                 case 1:
                     int secondChoice = getMenuChoice(
-                            "\nShow average winnings for:\n" +
+                            "\nShow profit for:\n" +
                                     "\t1. Event\n" +
                                     "\t2. Day\n" +
-                                    "\t3. Show overall average\n"
+                                    "\t3. Show overall profit\n"
                     );
 
                     switch (secondChoice) {
@@ -40,16 +40,29 @@ public class App {
                             ArrayList results = doSQLStatement(statement);
                             String eventID = getEventIDInput("Enter an event ID: ", results);
 
+                            // 1. get all stakes
                             statement = String.format(
-                                    "SELECT wager_id, odds, gambler_id, stake " +
+                                    "SELECT stake " +
+                                            "FROM wagers " +
+                                            "WHERE event_id = '%s';", eventID
+                            );
+
+                            int allStakes = sumOfStake(statement);
+
+                            // 2. get all payouts
+                            statement = String.format(
+                                    "SELECT stake " +
                                             "FROM wagers " +
                                             "WHERE event_id = '%s' AND selection = (  " +
                                             "SELECT selection " +
                                             "FROM wagers AS w1, events " +
-                                            "WHERE events.event_id = '%s' AND w1.selection <> events.outcome )" +
-                                            "ORDER BY stake; ", eventID, eventID);
+                                            "WHERE events.event_id = '%s' AND w1.selection = events.outcome ) " +
+                                            "ORDER BY stake; ", eventID, eventID
+                            );
 
-                            avgOfWinnings(statement);
+                            int payouts = sumOfStake(statement);
+
+                            System.out.println(allStakes - payouts);
 
                             break;
                         }
@@ -68,7 +81,7 @@ public class App {
                                     "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome) " +
                                     "AND date_of_wager = \'" + strdate + "\';";
 
-                            avgOfWinnings(statement);
+//                            avgOfWinnings(statement);
 
                             break;
                         }
@@ -81,7 +94,7 @@ public class App {
                                     "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome)" +
                                     ";";
 
-                            avgOfWinnings(statement);
+//                            avgOfWinnings(statement);
                             break;
                         }
                     }
@@ -203,7 +216,7 @@ public class App {
         }
     }
 
-    private static void avgOfWinnings(String statement) {
+    private static int sumOfStake(String statement) {
         try (Connection connection = DriverManager.getConnection(dbLocation);
              Statement stmt = connection.createStatement()) {
 
@@ -216,9 +229,10 @@ public class App {
                 count++;
             }
 
-            System.out.println("\nAverage: " + sum / count);
+            return sum;
         } catch (SQLException e) {
             e.printStackTrace();
+            return 0;
         }
     }
 }
