@@ -57,13 +57,12 @@ public class App {
                                             "INNER JOIN events e " +
                                             "ON w.event_id = e.event_id " +
                                             "AND e.event_id = '%s'" +
-                                            "AND e.outcome <> w.selection;", eventID
+                                            "AND e.outcome = w.selection;", eventID
                             );
 
                             int payouts = getSum(statement);
 
                             System.out.println("All payouts: "+ payouts);
-
                             System.out.println("Profits: " + (allStakes - payouts));
 
                             break;
@@ -75,36 +74,30 @@ public class App {
                             String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
 
                             // 1. get all stakes for that day
-                            String statement = String.format(
-                                    "SELECT stake " +
-                                            "FROM wagers " +
-                                            "WHERE date_of_wager = '%s';", strdate
+                            String statement = String.format("SELECT stake " +
+                                    "FROM wagers " +
+                                    "WHERE date_of_wager = '%s';", strdate
                             );
 
                             int stake = sumOfStake(statement);
 
                             // 2. get all payouts for that day
-                            statement = "SELECT stake " +
-                                    "FROM wagers " +
-                                    "WHERE " +
-                                    "selection = (SELECT selection " +
-                                    "FROM wagers AS w1, events AS e " +
-                                    "WHERE e.event_id = w1.event_id AND w1.selection = e.outcome) " +
-                                    "AND date_of_wager = '" + strdate + "';";
+                            statement = String.format("SELECT sum(stake) " +
+                                    "FROM wagers w " +
+                                    "INNER JOIN events e " +
+                                    "ON w.event_id = e.event_id " +
+                                    "AND e.outcome = w.selection " +
+                                    "AND w.date_of_wager = '%s';", strdate
+                            );
 
-                            System.out.println(statement);
-
-                            int payouts = sumOfStake(statement);
+                            int payouts = getSum(statement);
 
                             System.out.println("Profit: " + (stake - payouts));
 
                             break;
                         }
                         case 3: {
-
-                            String statement =
-                                    "SELECT stake " +
-                                            "FROM wagers;";
+                            String statement = "SELECT stake FROM wagers;";
 
                             int totalStake = sumOfStake(statement);
 
