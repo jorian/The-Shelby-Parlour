@@ -146,8 +146,37 @@ public class App {
                 case 3:
                     System.out.println("Popularity of matches");
 
+                    try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
+                        // 1. get number of won matches
+                        String statement =
+                                "SELECT group1.contender_id, won, played " +
+                                "FROM " +
+                                        "(SELECT x.contender_id, COUNT(x.contender_id) AS played " +
+                                        "FROM events e " +
+                                        "INNER JOIN contenders x " +
+                                        "ON (e.contender_1_id = x.contender_id) OR (e.contender_2_id =  x.contender_id) " +
+                                        "GROUP BY x.contender_id) AS group1 " +
+                                "LEFT JOIN " +
+                                        "(SELECT x.contender_id, COUNT(x.contender_id) AS won " +
+                                        "FROM events e " +
+                                        "INNER JOIN contenders x " +
+                                        "ON (e.contender_1_id = x.contender_id AND e.outcome = 1) OR (e.contender_2_id = x.contender_id AND e.outcome = 2) " +
+                                        "GROUP BY x.contender_id) AS group2 " +
+                                "ON group1.contender_id = group2.contender_id;";
 
+                        ResultSet resultSet = stmt.executeQuery(statement);
 
+                        while (resultSet.next()) {
+
+                            System.out.printf("\n%s\t WON: %d out of %d",
+                                    resultSet.getString("contender_id"),
+                                    resultSet.getInt("won"),
+                                    resultSet.getInt("played"));
+                        }
+                    }
+                    catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                     break;
             }
         }
