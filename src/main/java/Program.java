@@ -202,10 +202,10 @@ public class Program {
             jsonObject = new JSONObject(line);
             ppstmtEvent.setString(1, jsonObject.getString("event_id"));
             ppstmtEvent.setInt(2, jsonObject.getInt("outcome"));
-            ppstmtEvent.setString(3, jsonObject.getString("contender_1_id"));
-            ppstmtEvent.setInt(4, jsonObject.getInt("current_odds_contender_1"));
-            ppstmtEvent.setString(5, jsonObject.getString("contender_2_id"));
-            ppstmtEvent.setInt(6, jsonObject.getInt("current_odds_contender_2"));
+            ppstmtEvent.setInt(3, jsonObject.getInt("current_odds_contender_1"));
+            ppstmtEvent.setInt(4, jsonObject.getInt("current_odds_contender_2"));
+            ppstmtEvent.setString(5, jsonObject.getString("contender_1_id"));
+            ppstmtEvent.setString(6, jsonObject.getString("contender_2_id"));
             ppstmtEvent.addBatch();
         }
         ppstmtEvent.executeBatch();
