@@ -71,30 +71,52 @@ public class App {
                             LocalDate date = getDateInput();
 
                             String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-                            System.out.println(strdate);
 
-                            String statement = "SELECT stake " +
+                            // 1. get all stakes for that day
+                            String statement = String.format(
+                                    "SELECT stake " +
+                                            "FROM wagers " +
+                                            "WHERE date_of_wager = '%s';", strdate
+                            );
+
+                            int stake = sumOfStake(statement);
+
+                            // 2. get all payouts for that day
+                            statement = "SELECT stake " +
                                     "FROM wagers " +
                                     "WHERE " +
                                     "selection = (SELECT selection " +
                                     "FROM wagers AS w1, events AS e " +
-                                    "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome) " +
-                                    "AND date_of_wager = \'" + strdate + "\';";
+                                    "WHERE e.event_id = w1.event_id AND w1.selection = e.outcome) " +
+                                    "AND date_of_wager = '" + strdate + "';";
 
-//                            avgOfWinnings(statement);
+                            System.out.println(statement);
+
+                            int payouts = sumOfStake(statement);
+
+                            System.out.println("Profit: " + (stake - payouts));
 
                             break;
                         }
                         case 3: {
-                            String statement = "SELECT stake " +
+
+                            String statement =
+                                    "SELECT stake " +
+                                            "FROM wagers;";
+
+                            int totalStake = sumOfStake(statement);
+
+                            statement = "SELECT stake " +
                                     "FROM wagers " +
                                     "WHERE " +
                                     "selection = (SELECT selection " +
                                     "FROM wagers AS w1, events AS e " +
-                                    "WHERE e.event_id = w1.event_id AND w1.selection <> e.outcome)" +
+                                    "WHERE e.event_id = w1.event_id AND w1.selection = e.outcome)" +
                                     ";";
 
-//                            avgOfWinnings(statement);
+                            int payouts = sumOfStake(statement);
+
+                            System.out.println("Total profits: " + (totalStake - payouts));
                             break;
                         }
                     }
@@ -211,7 +233,7 @@ public class App {
                 LocalDate date = LocalDate.parse(line);
                 return date;
             } catch (DateTimeParseException dtpe) {
-                System.out.println("Date not entered correctly, please try again and use YYYY-MM-DD");
+                System.out.println("Date not entered correctly, please try again and enter the date as YYYY-MM-DD");
             }
         }
     }
