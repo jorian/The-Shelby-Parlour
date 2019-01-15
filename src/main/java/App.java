@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class App {
-    @SuppressWarnings("Duplicates")
-
     private final static String dbLocation = "jdbc:sqlite:src/shelby_v1.db";
 
     public static void main(String[] args) {
@@ -20,7 +18,7 @@ public class App {
                     "\n\n\n\n>>>>>> Main menu:\n\n" +
                             "\t1. Show profits\n" +
                             "\t2. Show possible cheaters\n" +
-                            "\t3. View popular boxing matches\n");
+                            "\t3. Show success rate of contenders\n");
 
             switch (choice) {
 
@@ -31,8 +29,7 @@ public class App {
                             "\nShow profit for:\n" +
                                     "\t1. Event\n" +
                                     "\t2. Day\n" +
-                                    "\t3. Show overall profit\n"
-                    );
+                                    "\t3. Show overall profit\n");
 
                     switch (secondChoice) {
                         case 1: {
@@ -44,8 +41,7 @@ public class App {
                             statement = String.format(
                                     "SELECT stake " +
                                             "FROM wagers " +
-                                            "WHERE event_id = '%s';", eventID
-                            );
+                                            "WHERE event_id = '%s';", eventID);
 
                             int allStakes = sumOfStake(statement);
                             System.out.println("All stakes: " + allStakes);
@@ -57,8 +53,7 @@ public class App {
                                             "INNER JOIN events e " +
                                             "ON w.event_id = e.event_id " +
                                             "AND e.event_id = '%s'" +
-                                            "AND e.outcome = w.selection;", eventID
-                            );
+                                            "AND e.outcome = w.selection;", eventID);
 
                             int payouts = aggregatedSumOfStake(statement);
 
@@ -70,14 +65,12 @@ public class App {
                         case 2: {
                             // Probably overkill, but this way we can check for a correct date:
                             LocalDate date = getDateInput();
-
                             String strdate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
 
                             // 1. get all stakes for that day
                             String statement = String.format("SELECT stake " +
                                     "FROM wagers " +
-                                    "WHERE date_of_wager = '%s';", strdate
-                            );
+                                    "WHERE date_of_wager = '%s';", strdate);
 
                             int stake = sumOfStake(statement);
 
@@ -87,11 +80,9 @@ public class App {
                                     "INNER JOIN events e " +
                                     "ON w.event_id = e.event_id " +
                                     "AND e.outcome = w.selection " +
-                                    "AND w.date_of_wager = '%s';", strdate
-                            );
+                                    "AND w.date_of_wager = '%s';", strdate);
 
                             int payouts = aggregatedSumOfStake(statement);
-
                             System.out.println("Profit: " + (stake - payouts));
 
                             break;
@@ -111,15 +102,13 @@ public class App {
                                     "AND e.outcome = w.selection;";
 
                             int payouts = aggregatedSumOfStake(statement);
-
                             System.out.println("Total profits: " + (totalStake - payouts));
+
                             break;
                         }
                     }
                     break;
                 case 2:
-                    System.out.println("Find cheaters!");
-
                     try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
                         String statement = String.format("SELECT gambler_id " +
                                 "FROM (" +
@@ -130,44 +119,44 @@ public class App {
                                     "AND e.outcome = w.selection " +
                                     "AND w.odds > 4 " +
                                     "GROUP BY gambler_id)" +
-                                "WHERE count > 3;"
-                        );
+                                "WHERE count > 3;");
 
                         ResultSet resultSet = stmt.executeQuery(statement);
 
                         while (resultSet.next()) {
                             System.out.println("CHEATER ID: " + resultSet.getString("gambler_id"));
                         }
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
+                    } catch (SQLException ex) { ex.printStackTrace(); }
 
                     break;
                 case 3:
-                    System.out.println("Popularity of matches");
-
                     try (Connection conn = DriverManager.getConnection(dbLocation); Statement stmt = conn.createStatement()) {
-                        // 1. get number of won matches
+                        /*
+                        This statement uses 2 subqueries to respectively query all matches played for each contender and
+                        all matches won for each contender. Then the resulting temporary relations are joined based on their
+                        contender_id.
+
+                        With this, we get a table with: gambler_id | won | played
+                         */
                         String statement =
-                                "SELECT group1.contender_id, won, played " +
-                                "FROM " +
-                                        "(SELECT x.contender_id, COUNT(x.contender_id) AS played " +
-                                        "FROM events e " +
-                                        "INNER JOIN contenders x " +
-                                        "ON (e.contender_1_id = x.contender_id) OR (e.contender_2_id =  x.contender_id) " +
-                                        "GROUP BY x.contender_id) AS group1 " +
-                                "LEFT JOIN " +
-                                        "(SELECT x.contender_id, COUNT(x.contender_id) AS won " +
-                                        "FROM events e " +
-                                        "INNER JOIN contenders x " +
-                                        "ON (e.contender_1_id = x.contender_id AND e.outcome = 1) OR (e.contender_2_id = x.contender_id AND e.outcome = 2) " +
-                                        "GROUP BY x.contender_id) AS group2 " +
-                                "ON group1.contender_id = group2.contender_id;";
+                        "SELECT group1.contender_id, won, played " +
+                        "FROM " +
+                                "(SELECT x.contender_id, COUNT(x.contender_id) AS played " +
+                                "FROM events e " +
+                                "INNER JOIN contenders x " +
+                                "ON (e.contender_1_id = x.contender_id) OR (e.contender_2_id =  x.contender_id) " +
+                                "GROUP BY x.contender_id) AS group1 " +
+                        "LEFT JOIN " +
+                                "(SELECT x.contender_id, COUNT(x.contender_id) AS won " +
+                                "FROM events e " +
+                                "INNER JOIN contenders x " +
+                                "ON (e.contender_1_id = x.contender_id AND e.outcome = 1) OR (e.contender_2_id = x.contender_id AND e.outcome = 2) " +
+                                "GROUP BY x.contender_id) AS group2 " +
+                        "ON group1.contender_id = group2.contender_id;";
 
                         ResultSet resultSet = stmt.executeQuery(statement);
 
                         while (resultSet.next()) {
-
                             System.out.printf("\n%s\t WON: %d out of %d",
                                     resultSet.getString("contender_id"),
                                     resultSet.getInt("won"),
@@ -183,8 +172,7 @@ public class App {
     }
 
     private static ArrayList<String> doSQLStatement(String statement) {
-        try (Connection connection = DriverManager.getConnection(dbLocation);
-             Statement stmt = connection.createStatement()) {
+        try (Connection connection = DriverManager.getConnection(dbLocation); Statement stmt = connection.createStatement()) {
 
             ResultSet resultSet = stmt.executeQuery(statement);
             ArrayList<String> results = new ArrayList<>();
@@ -205,9 +193,8 @@ public class App {
         System.out.println(questions);
 
         while (true) {
-            Scanner reader = new Scanner(System.in);
-
             System.out.print("Make your choice: ");
+            Scanner reader = new Scanner(System.in);
             String line = reader.nextLine();
 
             try {
@@ -227,7 +214,6 @@ public class App {
             String line = reader.nextLine();
 
             if (options.contains(line)) {
-
                 return line;
             } else
                 System.out.println("That event ID does not exist");
@@ -242,9 +228,7 @@ public class App {
             String line = reader.nextLine();
 
             try {
-                LocalDate date = LocalDate.parse(line);
-
-                return date;
+                return LocalDate.parse(line);
             } catch (DateTimeParseException dtpe) {
                 System.out.println("Date not entered correctly, please try again and enter the date as YYYY-MM-DD");
             }
@@ -252,38 +236,29 @@ public class App {
     }
 
     private static int sumOfStake(String statement) {
-        try (Connection connection = DriverManager.getConnection(dbLocation);
-             Statement stmt = connection.createStatement()) {
-            System.out.println(statement);
+        try (Connection connection = DriverManager.getConnection(dbLocation); Statement stmt = connection.createStatement()) {
 
             ResultSet resultSet = stmt.executeQuery(statement);
             int sum = 0;
-            int count = 0;
+
             while (resultSet.next()) {
                 int stake = resultSet.getInt("stake");
                 sum += stake;
-                count++;
             }
 
             return sum;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
     }
 
     private static int aggregatedSumOfStake(String statement) {
         try (Connection connection = DriverManager.getConnection(dbLocation);
              Statement stmt = connection.createStatement()) {
-            System.out.println(statement);
 
             ResultSet resultSet = stmt.executeQuery(statement);
 
             return resultSet.getInt(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-
-            return 0;
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
     }
 }

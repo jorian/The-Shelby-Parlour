@@ -52,11 +52,12 @@ public class DataCreator {
     public static void createWagers() throws IOException {
         File wagers = new File("src/wagers.json");
         Random rand = new Random();
+
         for (int i = 19; i < 40; i++) {
             JsonObject bet = new JsonObject();
             bet.addProperty("wager_id", "w" + i);
-            bet.addProperty("event_id", "ev00"+(rand.nextInt(10)+3));
-            bet.addProperty("gambler_id", "g00000"+rand.nextInt(32));
+            bet.addProperty("event_id", "ev00" + (rand.nextInt(10)+3));
+            bet.addProperty("gambler_id", "g00000" + rand.nextInt(32));
             bet.addProperty("odds", rand.nextInt(6)+1);
             bet.addProperty("selection", rand.nextInt(2)+1);
             bet.addProperty("stake", rand.nextInt(10000) + 5);
